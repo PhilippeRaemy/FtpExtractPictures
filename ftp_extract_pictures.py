@@ -12,7 +12,6 @@ PROFILES_JSON = 'profiles.json'
 with open(PROFILES_JSON) as j:
     profiles = json.loads(j.read())
 
-
 def explode_profile(profile_name):
     profile = profiles[profile_name]
     return profile['username'], \
@@ -69,7 +68,7 @@ def remove_timestamp_file(local_directory):
                 except:
                     pass
         remove(file_full_name)
-    return date_threshold
+    return date_threshold, lambda _: remove(file_full_name)
 
 
 @profile.command('show')
@@ -136,7 +135,7 @@ def _extract(profile):
             ftp.login(user=username, passwd=password)
             print(ftp.getwelcome())
 
-            date_threshold = remove_timestamp_file(local_directory)  # do this only when FTP connection was successful
+            date_threshold, remover = remove_timestamp_file(local_directory)  # do this only when FTP connection was successful
 
             def datetime_from_utc_to_local(utc_datetime):
                 ts = utc_datetime.timestamp()
@@ -175,6 +174,7 @@ def _extract(profile):
         threshold_file = path.join(local_directory, f"lastTimestamp_{date_threshold.strftime('%Y-%m-%d_%H-%M')}.txt")
         with open(threshold_file, 'w') as ts:
             ts.write(date_threshold.strftime('%Y-%m-%d %H:%M'))
+            remover()
         print(f'Created threshold file {threshold_file}.')
 
 
