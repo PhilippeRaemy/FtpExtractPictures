@@ -53,23 +53,18 @@ def explode_profile(profile_name):
 @click.group()
 @click.version_option()
 def cli():
-    pass
+    """Handle pictures from phone via FTP"""
 
 
 @cli.group()
 def ftp():
-    pass
+    """FTP operations"""
 
 
-def main():
-    """Connect to phones via FTP and explore or recover images"""
-    pass
-
-
-@ftp.command('explore')
-@click.option('--profile' , prompt='profile name')
+@ftp.command("explore")
+@click.option('--profile', prompt='profile name')
 @click.option('--directory', prompt='root directory')
-def explore(profile: str, directory: str):
+def _explore(profile: str, directory: str):
     username, password, _, remote_host, port, _, _ = explode_profile(profile)
 
     with FTP() as ftp:
@@ -100,7 +95,7 @@ def remove_timestamp_file(local_directory):
 
 @ftp.command('extract')
 @click.option('--profile', prompt='profile name')
-def extract(profile):
+def _extract(profile):
     username, password, local_directory, remote_host, port, remote_directories, extensions = explode_profile(profile)
 
     ext_re = re.compile('^.*\\' + ('$|^.*\\'.join(extensions)) + '$', re.IGNORECASE)
@@ -157,7 +152,7 @@ def extract(profile):
 
 
 if __name__ == '__main__':
-    explore()
+    _explore()
     # extract(profile="philippe")
     # explore("philippe", '/')
     # extract("severine")
