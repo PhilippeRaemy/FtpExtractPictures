@@ -1,15 +1,16 @@
+import re
 from datetime import datetime
 from ftplib import FTP
-import re
 from os import listdir, path, remove
+
 import click
 
 profiles = {
     'philippe': {
         'username': "philippe",
         'password': "philippe",
-        'local_directory': "d:/users/public/pictures/fromphones/philippe",
-        'remote_host': "192.168.0.11",
+        'local_directory': "c:/users/public/pictures/fromphones/philippe",
+        'remote_host': "192.168.1.26",
         'port': 2121,
         'remote_directories': [
             "/Pictures",
@@ -49,9 +50,25 @@ def explode_profile(profile_name):
            profile['extensions']
 
 
-# @click.command('explore')
-# @click.option('--profile', prompt='profile name')
-# @click.option('--directory', prompt='root directory')
+@click.group()
+@click.version_option()
+def cli():
+    pass
+
+
+@cli.group()
+def ftp():
+    pass
+
+
+def main():
+    """Connect to phones via FTP and explore or recover images"""
+    pass
+
+
+@ftp.command('explore')
+@click.option('--profile' , prompt='profile name')
+@click.option('--directory', prompt='root directory')
 def explore(profile: str, directory: str):
     username, password, _, remote_host, port, _, _ = explode_profile(profile)
 
@@ -81,8 +98,8 @@ def remove_timestamp_file(local_directory):
     return date_threshold
 
 
-# @click.command('extract')
-# @click.option('--profile', prompt='profile name')
+@ftp.command('extract')
+@click.option('--profile', prompt='profile name')
 def extract(profile):
     username, password, local_directory, remote_host, port, remote_directories, extensions = explode_profile(profile)
 
@@ -119,12 +136,13 @@ def extract(profile):
             for remote_directory in remote_directories:
                 for (d, n, a) in deep_list(remote_directory, date_threshold, recurse=True):
                     file = path.join(local_directory, n)
-                    print(f'Getting {file} from {d}/{n}...', end='')
-                    if path.isfile(file):
-                        print(f'{file} already exists')
+                    msg = f'Getting {file} from {d}/{n} ({int(a["size"]) / 1024 / 1024:,.3f} Mb)...'
+                    if path.isfile(file) and path.getsize(file) == int(a["size"]):
+                        print(f'{msg} already exists')
                     else:
+                        print(msg)
                         ftp.retrbinary('RETR ' + d + '/' + n, open(file, 'wb').write)
-                        print(' Done.')
+                        print(f'{msg} Done.')
 
         date_threshold = datetime.now()
 
@@ -139,7 +157,8 @@ def extract(profile):
 
 
 if __name__ == '__main__':
-    extract(profile="philippe")
+    explore()
+    # extract(profile="philippe")
     # explore("philippe", '/')
     # extract("severine")
     # explore("severine", '/Pictures/Screenshots')
