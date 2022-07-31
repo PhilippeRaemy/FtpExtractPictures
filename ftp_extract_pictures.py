@@ -1,3 +1,4 @@
+import json
 import re
 from datetime import datetime
 from ftplib import FTP
@@ -59,6 +60,9 @@ def cli():
 @cli.group()
 def ftp():
     """FTP operations"""
+@cli.group()
+def profile():
+    """profile operations"""
 
 
 @ftp.command("explore")
@@ -92,6 +96,11 @@ def remove_timestamp_file(local_directory):
         remove(file_full_name)
     return date_threshold
 
+
+@profile.command('show')
+@click.option('--profile', prompt='profile name')
+def show_profile(profile):
+    print(json.dumps(profiles[profile], indent=4))
 
 @ftp.command('extract')
 @click.option('--profile', prompt='profile name')
