@@ -86,12 +86,27 @@ def show_profile(profile):
 @click.option('--port', prompt='port', required=False, default=None, type=int)
 @click.option('--directories', prompt='remote directories', required=False, default=None, type=str)
 @click.option('--extensions', prompt='extensions', required=False, default=None, type=str)
-def edit_profile(profile, username, password, host, port, directories, extensions):
+@click.option('--add_directories', prompt='add directories', required=False, default=None, type=str)
+@click.option('--remove_directories', prompt='remove directories', required=False, default=None, type=str)
+@click.option('--add_extensions', prompt='add extensions', required=False, default=None, type=str)
+@click.option('--remove_extensions', prompt='remove extensions', required=False, default=None, type=str)
+def edit_profile(profile, username, password, host, port, directories, extensions, add_directories, remove_directories,
+                 add_extensions, remove_extensions):
     dic = deepcopy(profiles.get(profile, profiles.get('default', {})))
     if directories:
         dic['directories'] = directories.split(';')
     if extensions:
         dic['extensions'] = extensions.split(';')
+    if add_directories:
+        dic['directories'] = dic['directories'] + add_directories.split(';')
+    if add_extensions:
+        dic['extensions'] = dic['extentions'] + add_extensions.split(';')
+    if remove_directories:
+        rm = remove_directories.split(';')
+        dic['directories'] = [d for d in dic['directories'] if d not in rm]
+    if remove_extensions:
+        rm = remove_extensions.split(';')
+        dic['extensions'] = [e for e in dic['extentions'] if e not in rm]
     if username:
         dic['username'] = username
     if host:
