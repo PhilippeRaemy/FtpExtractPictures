@@ -1,12 +1,15 @@
 import json
 import re
+from copy import deepcopy
 from datetime import datetime
 from ftplib import FTP
 from os import listdir, path, remove
 
 import click
 
-with open('profiles.json') as  j:
+PROFILES_JSON = 'profiles.json'
+
+with open(PROFILES_JSON) as j:
     profiles = json.loads(j.read())
 
 
@@ -30,6 +33,8 @@ def cli():
 @cli.group()
 def ftp():
     """FTP operations"""
+
+
 @cli.group()
 def profile():
     """profile operations"""
@@ -70,7 +75,35 @@ def remove_timestamp_file(local_directory):
 @profile.command('show')
 @click.option('--profile', prompt='profile name')
 def show_profile(profile):
-    print(json.dumps(profiles[profile], indent=4))
+    print(json.dumps(profiles[profile], indent=2))
+
+
+@profile.command('edit')
+@click.option('--profile', prompt='profile name', required=True)
+@click.option('--username', prompt='user name', required=False, default=None, type=str)
+@click.option('--password', prompt='password', required=False, default=None, type=str)
+@click.option('--host', prompt='remote host', required=False, default=None, type=str)
+@click.option('--port', prompt='port', required=False, default=None, type=int)
+@click.option('--directories', prompt='remote directories', required=False, default=None, type=str)
+@click.option('--extensions', prompt='extensions', required=False, default=None, type=str)
+def edit_profile(profile, username, password, host, port, directories, extensions):
+    dic = deepcopy(profiles.get(profile, profiles.get('default', {})))
+    if directories:
+        dic['directories'] = directories.split(';')
+    if extensions:
+        dic['extensions'] = extensions.split(';')
+    if username:
+        dic['username'] = username
+    if host:
+        dic['host'] = host
+    if port:
+        dic['port'] = port
+    profiles[profile] = dic
+    with open(PROFILES_JSON, 'w') as j:
+        dumps = json.dumps(profiles, indent=2)
+        print(dumps)
+        j.write(dumps)
+
 
 @ftp.command('extract')
 @click.option('--profile', prompt='profile name')
