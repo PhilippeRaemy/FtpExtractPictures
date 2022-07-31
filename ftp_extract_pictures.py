@@ -6,38 +6,8 @@ from os import listdir, path, remove
 
 import click
 
-profiles = {
-    'philippe': {
-        'username': "philippe",
-        'password': "philippe",
-        'local_directory': "c:/users/public/pictures/fromphones/philippe",
-        'remote_host': "192.168.1.26",
-        'port': 2121,
-        'remote_directories': [
-            "/Pictures",
-            "/DCIM",
-            "/Telegram",
-            "/Threema",
-            "/Movies/Threema",
-            "/Android/media/com.whatsapp"
-        ],
-        'extensions': ['.jpg', '.jpeg', '.mov', '.mp4', '.vid', '.div']},
-    'severine': {
-        'username': "severine",
-        'password': "severine",
-        'local_directory': "d:/users/public/pictures/fromphones/FairSev",
-        'remote_host': "192.168.0.12",
-        'port': 2121,
-        'remote_directories': [
-            "/Pictures",
-            "/DCIM",
-            "/Telegram",
-            "/Threema",
-            "/Movies/Threema",
-            #     "/Android/media/com.whatsapp"
-        ],
-        'extensions': ['.jpg', '.jpeg', '.mov', '.mp4', '.vid', '.div']}
-}
+with open('profiles.json') as  j:
+    profiles = json.loads(j.read())
 
 
 def explode_profile(profile_name):
