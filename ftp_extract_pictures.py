@@ -12,6 +12,7 @@ PROFILES_JSON = 'profiles.json'
 with open(PROFILES_JSON) as j:
     profiles = json.loads(j.read())
 
+
 def explode_profile(profile_name):
     profile = profiles[profile_name]
     return profile['username'], \
@@ -71,27 +72,47 @@ def remove_timestamp_file(local_directory):
     return date_threshold, lambda _: remove(file_full_name)
 
 
+@profile.command('list')
+def list_profiles():
+    print(f'Available profiles are :{profiles.keys()}')
+
+
 @profile.command('show')
-@click.option('--profile', prompt='profile name')
-def show_profile(profile):
-    print(json.dumps(profiles[profile], indent=2))
+@click.option('--profile', default='')
+def show_profile(profile = None):
+    if profile:
+        print(json.dumps(profiles[profile], indent=2))
+    else:
+        # list_profiles()
+        print(f'Available profiles are :{profiles.keys()}')
+
+@profile.command()
+@click.option('--n', default=3)
+def dots(n):
+    click.echo('.' * n)
 
 
 @profile.command('edit')
-@click.option('--profile', prompt='profile name', required=True)
-@click.option('--username', prompt='user name', required=False, default=None, type=str)
-@click.option('--password', prompt='password', required=False, default=None, type=str)
-@click.option('--host', prompt='remote host', required=False, default=None, type=str)
-@click.option('--port', prompt='port', required=False, default=None, type=int)
-@click.option('--directories', prompt='remote directories', required=False, default=None, type=str)
-@click.option('--extensions', prompt='extensions', required=False, default=None, type=str)
-@click.option('--add_directories', prompt='add directories', required=False, default=None, type=str)
-@click.option('--remove_directories', prompt='remove directories', required=False, default=None, type=str)
-@click.option('--add_extensions', prompt='add extensions', required=False, default=None, type=str)
-@click.option('--remove_extensions', prompt='remove extensions', required=False, default=None, type=str)
-def edit_profile(profile, username, password, host, port, directories, extensions, add_directories, remove_directories,
-                 add_extensions, remove_extensions):
-    dic = deepcopy(profiles.get(profile, profiles.get('default', {})))
+@click.option('--profile', required=True)
+@click.option('--username', required=False, default=None, type=str)
+@click.option('--password', required=False, default=None, type=str)
+@click.option('--host', required=False, default=None, type=str)
+@click.option('--port', required=False, default=None, type=int)
+@click.option('--local', required=False, default=None, type=str)
+@click.option('--directories', required=False, default=None, type=str)
+@click.option('--extensions', required=False, default=None, type=str)
+@click.option('--add_directories', required=False, default=None, type=str)
+@click.option('--remove_directories', required=False, default=None, type=str)
+@click.option('--add_extensions', required=False, default=None, type=str)
+@click.option('--remove_extensions', required=False, default=None, type=str)
+@click.option('--model', required=False, default=None, type=str)
+def edit_profile(profile, username=None, password=None, host=None, port=None, local=None,
+                 directories=None, extensions=None,
+                 add_directories=None, remove_directories=None,
+                 add_extensions=None, remove_extensions=None, model='default'):
+    dic = deepcopy(profiles.get(profile, profiles.get(model, {})))
+    if local:
+        dic['local_directory'] = local
     if directories:
         dic['directories'] = directories.split(';')
     if extensions:
@@ -108,14 +129,16 @@ def edit_profile(profile, username, password, host, port, directories, extension
         dic['extensions'] = [e for e in dic['extentions'] if e not in rm]
     if username:
         dic['username'] = username
+    if password:
+        dic['password'] = username
     if host:
-        dic['host'] = host
+        dic['remote_host'] = host
     if port:
         dic['port'] = port
     profiles[profile] = dic
+    print(json.dumps(dic, indent=2))
     with open(PROFILES_JSON, 'w') as j:
         dumps = json.dumps(profiles, indent=2)
-        print(dumps)
         j.write(dumps)
 
 
@@ -136,7 +159,8 @@ def _extract(profile):
             ftp.login(user=username, passwd=password)
             print(ftp.getwelcome())
 
-            date_threshold, remover = remove_timestamp_file(local_directory)  # do this only when FTP connection was successful
+            date_threshold, remover = remove_timestamp_file(
+                local_directory)  # do this only when FTP connection was successful
 
             def datetime_from_utc_to_local(utc_datetime):
                 ts = utc_datetime.timestamp()
