@@ -46,6 +46,7 @@ def _explore(profile: str, directory: str):
     username, password, _, remote_host, port, _, _ = explode_profile(profile)
 
     with FTP() as ftp:
+        print(f'Connecting to {remote_host}:{port}')
         ftp.connect(host=remote_host, port=port)
         ftp.login(user=username, passwd=password)
         print(ftp.getwelcome())
@@ -62,12 +63,11 @@ def remove_timestamp_file(local_directory):
         with open(file_full_name, 'r', encoding='utf-8') as ts:
             for li in ts.readlines():
                 try:
-                    date = datetime.strptime(li, '%Y-%m-%d %H:%M')
+                    date = datetime.strptime(li.strip(), '%Y-%m-%d %H:%M')
                     if date_threshold < date:
                         date_threshold = date
                 except:
                     pass
-        remove(file_full_name)
     return date_threshold, lambda _: remove(file_full_name)
 
 
@@ -131,6 +131,7 @@ def _extract(profile):
     date_threshold = None
     try:
         with FTP() as ftp:
+            print(f'Connecting to {remote_host}:{port}')
             ftp.connect(host=remote_host, port=port)
             ftp.login(user=username, passwd=password)
             print(ftp.getwelcome())
@@ -174,7 +175,7 @@ def _extract(profile):
         threshold_file = path.join(local_directory, f"lastTimestamp_{date_threshold.strftime('%Y-%m-%d_%H-%M')}.txt")
         with open(threshold_file, 'w') as ts:
             ts.write(date_threshold.strftime('%Y-%m-%d %H:%M'))
-            remover()
+            remover(None)
         print(f'Created threshold file {threshold_file}.')
 
 
