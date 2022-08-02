@@ -1,41 +1,86 @@
 {
-    "default": {
-        "username": "philippe",
-        "password": "philippe",
-        "local_directory": "c:/users/public/pictures/fromphones/philippe",
-        "port": 2121,
-        "extensions": [".jpg", ".jpeg", ".mov", ".mp4", ".vid", ".div"]
-    },
-    "philippe": {
-        "username": "philippe",
-        "password": "philippe",
-        "local_directory": "c:/users/public/pictures/fromphones/philippe",
-        "remote_host": "192.168.1.26",
-        "port": 2121,
-        "remote_directories": [
-            "/Pictures",
-            "/DCIM",
-            "/Telegram",
-            "/Threema",
-            "/Movies/Threema",
-            "/Android/media/com.whatsapp"
-        ],
-        "extensions": [".jpg", ".jpeg", ".mov", ".mp4", ".vid", ".div"]
-    },
-    "severine": {
-        "username": "severine",
-        "password": "severine",
-        "local_directory": "d:/users/public/pictures/fromphones/FairSev",
-        "remote_host": "192.168.0.12",
-        "port": 2121,
-        "remote_directories": [
-            "/Pictures",
-            "/DCIM",
-            "/Telegram",
-            "/Threema",
-            "/Movies/Threema",
-            "/Android/media/com.whatsapp"
-        ],
-        "extensions": [".jpg", ".jpeg", ".mov", ".mp4", ".vid", ".div"]
-    }
+  "default": {
+    "username": "philippe",
+    "password": "philippe",
+    "local_directory": "c:/users/public/pictures/fromphones/philippe",
+    "port": 2121,
+    "extensions": [
+      ".jpg",
+      ".jpeg",
+      ".mov",
+      ".mp4",
+      ".vid",
+      ".div"
+    ]
+  },
+  "philippe": {
+    "username": "philippe",
+    "password": "philippe",
+    "local_directory": "d:/users/public/pictures/fromphones/Philippe",
+    "remote_host": "192.168.0.126",
+    "port": 2121,
+    "remote_directories": [
+      "/Pictures",
+      "/DCIM",
+      "/Telegram",
+      "/Threema",
+      "/Movies/Threema",
+      "/Android/media/com.whatsapp"
+    ],
+    "extensions": [
+      ".jpg",
+      ".jpeg",
+      ".mov",
+      ".mp4",
+      ".vid",
+      ".div"
+    ],
+    "host": "192.168.0.126"
+  },
+  "severine": {
+    "username": "severine",
+    "password": "severine",
+    "local_directory": "d:/users/public/pictures/fromphones/FairSev",
+    "remote_host": "192.168.0.12",
+    "port": 2121,
+    "remote_directories": [
+      "/Pictures",
+      "/DCIM",
+      "/Telegram",
+      "/Threema",
+      "/Movies/Threema",
+      "/Android/media/com.whatsapp"
+    ],
+    "extensions": [
+      ".jpg",
+      ".jpeg",
+      ".mov",
+      ".mp4",
+      ".vid",
+      ".div"
+    ]
+  },
+  "philippe_hotspot": {
+    "username": "philippe",
+    "password": "philippe",
+    "local_directory": "c:/users/public/pictures/fromphones/philippe",
+    "remote_host": "192.168.1.26",
+    "port": 2121,
+    "remote_directories": [
+      "/Pictures",
+      "/DCIM",
+      "/Telegram",
+      "/Threema",
+      "/Movies/Threema",
+      "/Android/media/com.whatsapp"
+    ],
+    "extensions": [
+      ".jpg",
+      ".jpeg",
+      ".mov",
+      ".mp4",
+      ".vid",
+      ".div"
+    ]
+  }
 }
