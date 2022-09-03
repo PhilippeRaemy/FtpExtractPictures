@@ -8,8 +8,9 @@ from os import listdir, path, remove
 import click
 
 PROFILES_JSON = 'profiles.json'
+profiles_json = path.sep.join(path.realpath(__file__).split(path.sep)[:-1] + [PROFILES_JSON])
 
-with open(PROFILES_JSON) as j:
+with open(profiles_json) as j:
     profiles = json.loads(j.read())
 
 
@@ -79,12 +80,13 @@ def list_profiles():
 
 @profile.command('show')
 @click.option('--profile', default='')
-def show_profile(profile = None):
+def show_profile(profile=None):
     if profile:
         print(json.dumps(profiles[profile], indent=2))
     else:
         # list_profiles()
         print(f'Available profiles are :{profiles.keys()}')
+
 
 @profile.command()
 @click.option('--n', default=3)
@@ -120,13 +122,13 @@ def edit_profile(profile, username=None, password=None, host=None, port=None, lo
     if add_directories:
         dic['directories'] = dic['directories'] + add_directories.split(';')
     if add_extensions:
-        dic['extensions'] = dic['extentions'] + add_extensions.split(';')
+        dic['extensions'] = dic['extensions'] + add_extensions.split(';')
     if remove_directories:
         rm = remove_directories.split(';')
         dic['directories'] = [d for d in dic['directories'] if d not in rm]
     if remove_extensions:
         rm = remove_extensions.split(';')
-        dic['extensions'] = [e for e in dic['extentions'] if e not in rm]
+        dic['extensions'] = [e for e in dic['extensions'] if e not in rm]
     if username:
         dic['username'] = username
     if password:
@@ -137,7 +139,7 @@ def edit_profile(profile, username=None, password=None, host=None, port=None, lo
         dic['port'] = port
     profiles[profile] = dic
     print(json.dumps(dic, indent=2))
-    with open(PROFILES_JSON, 'w') as j:
+    with open(profiles_json, 'w') as j:
         dumps = json.dumps(profiles, indent=2)
         j.write(dumps)
 
