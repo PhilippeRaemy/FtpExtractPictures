@@ -16,8 +16,8 @@
   "philippe": {
     "username": "philippe",
     "password": "philippe",
-    "local_directory": "d:/users/public/pictures/fromphones/Philippe",
-    "remote_host": "192.168.0.126",
+    "local_directory": "c:/users/public/pictures/fromphones/philippe",
+    "remote_host": "192.168.1.26",
     "port": 2121,
     "remote_directories": [
       "/Pictures",
@@ -63,8 +63,8 @@
   "philippe_hotspot": {
     "username": "philippe",
     "password": "philippe",
-    "local_directory": "c:/users/public/pictures/fromphones/philippe",
-    "remote_host": "192.168.1.26",
+    "local_directory": "C:\\Users\\Philippe\\OneDrive - RL&Kids\\Pictures\\FromPhones\\Philippe",
+    "remote_host": "192.168.83.226",
     "port": 2121,
     "remote_directories": [
       "/Pictures",
