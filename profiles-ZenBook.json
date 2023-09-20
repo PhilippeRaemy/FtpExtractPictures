@@ -63,57 +63,11 @@
       ".div"
     ]
   },
-  "severine-25": {
-    "username": "severine",
-    "password": "severine",
-    "local_directory": "d:/users/public/pictures/fromphones/FairSev",
-    "remote_host": "192.168.0.25",
-    "port": 2121,
-    "remote_directories": [
-      "/Pictures",
-      "/DCIM",
-      "/Telegram",
-      "/Threema",
-      "/Movies/Threema",
-      "/Android/media/com.whatsapp"
-    ],
-    "extensions": [
-      ".jpg",
-      ".jpeg",
-      ".mov",
-      ".mp4",
-      ".vid",
-      ".div"
-    ]
-  },
-  "severine-15": {
-    "username": "severine",
-    "password": "severine",
-    "local_directory": "d:/users/public/pictures/fromphones/FairSev",
-    "remote_host": "192.168.0.15",
-    "port": 2121,
-    "remote_directories": [
-      "/Pictures",
-      "/DCIM",
-      "/Telegram",
-      "/Threema",
-      "/Movies/Threema",
-      "/Android/media/com.whatsapp"
-    ],
-    "extensions": [
-      ".jpg",
-      ".jpeg",
-      ".mov",
-      ".mp4",
-      ".vid",
-      ".div"
-    ]
-  },
   "philippe_hotspot": {
     "username": "philippe",
     "password": "philippe",
-    "local_directory": "C:\\Users\\Philippe\\OneDrive - RL&Kids\\Pictures\\FromPhones\\Philippe",
-    "remote_host": "192.168.83.226",
+    "local_directory": "c:/users/public/pictures/fromphones/philippe",
+    "remote_host": "192.168.1.26",
     "port": 2121,
     "remote_directories": [
       "/Pictures",
