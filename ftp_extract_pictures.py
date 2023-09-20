@@ -14,15 +14,22 @@ with open(profiles_json) as j:
     profiles = json.loads(j.read())
 
 
-def explode_profile(profile_name):
+def explode_profile(profile_name, username, password, host, port, local, directories, extensions, add_directories,
+                    remove_directories, add_extensions, remove_extensions):
     profile = profiles[profile_name]
-    return profile['username'], \
-           profile['password'], \
-           profile['local_directory'], \
-           profile['remote_host'], \
-           profile['port'], \
-           profile['remote_directories'], \
-           profile['extensions']
+    return username if username else profile['username'], \
+           password if password else profile['password'], \
+           local if local else profile['local_directory'], \
+           host if host else profile['remote_host'], \
+           port if port else profile['port'], \
+           directories if directories else \
+               set(profile['remote_directories']) \
+                   .union(add_directories if add_directories else []) \
+                   .difference(remove_directories if remove_directories else []), \
+           extensions if extensions else \
+               set(profile['extensions']) \
+                   .union(add_extensions if add_extensions else add_extensions) \
+                   .difference(remove_extensions if remove_extensions else remove_extensions)
 
 
 @click.group()
@@ -44,8 +51,21 @@ def profile():
 @ftp.command("explore")
 @click.option('--profile', prompt='profile name')
 @click.option('--directory', prompt='root directory')
-def _explore(profile: str, directory: str):
-    username, password, _, remote_host, port, _, _ = explode_profile(profile)
+@click.option('--username', required=False, default=None, type=str)
+@click.option('--password', required=False, default=None, type=str)
+@click.option('--host', required=False, default=None, type=str)
+@click.option('--port', required=False, default=None, type=int)
+@click.option('--local', required=False, default=None, type=str)
+@click.option('--extensions', required=False, default=[], type=str)
+@click.option('--add_extensions', required=False, default=[], type=str)
+@click.option('--remove_extensions', required=False, default=[], type=str)
+def _explore(profile: str, directory: str, username, password, host, port, local,
+             extensions,
+             add_extensions, remove_extensions):
+    username, password, _, remote_host, port, _, _ = explode_profile(profile, username, password, host, port, local,
+                                                                     [], extensions,
+                                                                     [], [],
+                                                                     add_extensions, remove_extensions)
 
     with FTP() as ftp:
         print(f'Connecting to {remote_host}:{port}')
@@ -60,6 +80,7 @@ def remove_timestamp_file(local_directory):
     re_file = re.compile('lastTimestamp.*.txt', re.IGNORECASE)
     date_threshold = datetime(1900, 1, 1)
 
+    file_full_name = None
     for lastTimestamp in sorted(fi for fi in listdir(local_directory) if re_file.match(fi)):
         file_full_name = path.join(local_directory, lastTimestamp)
         with open(file_full_name, 'r', encoding='utf-8') as ts:
@@ -70,7 +91,7 @@ def remove_timestamp_file(local_directory):
                         date_threshold = date
                 except:
                     pass
-    return date_threshold, lambda _: remove(file_full_name)
+    return date_threshold, (lambda _: remove(file_full_name)) if file_full_name else None
 
 
 @profile.command('list')
@@ -120,7 +141,7 @@ def edit_profile(profile, username=None, password=None, host=None, port=None, lo
     if extensions:
         dic['extensions'] = extensions.split(';')
     if add_directories:
-        dic['directories'] = dic['directories'] + add_directories.split(';')
+        dic['remote_directories'] = dic['remote_directories'] + add_directories.split(';')
     if add_extensions:
         dic['extensions'] = dic['extensions'] + add_extensions.split(';')
     if remove_directories:
@@ -146,8 +167,24 @@ def edit_profile(profile, username=None, password=None, host=None, port=None, lo
 
 @ftp.command('extract')
 @click.option('--profile', prompt='profile name')
-def _extract(profile):
-    username, password, local_directory, remote_host, port, remote_directories, extensions = explode_profile(profile)
+@click.option('--username', required=False, default=None, type=str)
+@click.option('--password', required=False, default=None, type=str)
+@click.option('--host', required=False, default=None, type=str)
+@click.option('--port', required=False, default=None, type=int)
+@click.option('--local', required=False, default=None, type=str)
+@click.option('--directories', required=False, default=[], type=str)
+@click.option('--extensions', required=False, default=[], type=str)
+@click.option('--add_directories', required=False, default=[], type=str)
+@click.option('--remove_directories', required=False, default=[], type=str)
+@click.option('--add_extensions', required=False, default=[], type=str)
+@click.option('--remove_extensions', required=False, default=[], type=str)
+def _extract(profile, username, password, host, port, local, directories, extensions, add_directories,
+             remove_directories, add_extensions, remove_extensions):
+    username, password, local_directory, remote_host, port, remote_directories, extensions \
+        = explode_profile(profile, username, password, host, port, local,
+                          directories, extensions,
+                          add_directories, remove_directories,
+                          add_extensions, remove_extensions)
 
     ext_re = re.compile('^.*\\' + ('$|^.*\\'.join(extensions)) + '$', re.IGNORECASE)
 
@@ -201,7 +238,8 @@ def _extract(profile):
         threshold_file = path.join(local_directory, f"lastTimestamp_{date_threshold.strftime('%Y-%m-%d_%H-%M')}.txt")
         with open(threshold_file, 'w') as ts:
             ts.write(date_threshold.strftime('%Y-%m-%d %H:%M'))
-            remover(None)
+            if remover:
+                remover(None)
         print(f'Created threshold file {threshold_file}.')
 
 
