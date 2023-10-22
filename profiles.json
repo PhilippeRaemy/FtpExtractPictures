@@ -86,6 +86,29 @@
       ".div"
     ]
   },
+  "severine-zenbook": {
+    "username": "severine",
+    "password": "severine",
+    "local_directory": "C:\\Users\\Philippe\\OneDrive - RL&Kids\\Pictures\\FromPhones\\FairSev",
+    "remote_host": "192.168.1.81",
+    "port": 2121,
+    "remote_directories": [
+      "/Pictures",
+      "/DCIM",
+      "/Telegram",
+      "/Threema",
+      "/Movies/Threema",
+      "/Android/media/com.whatsapp"
+    ],
+    "extensions": [
+      ".jpg",
+      ".jpeg",
+      ".mov",
+      ".mp4",
+      ".vid",
+      ".div"
+    ]
+  },
   "severine-15": {
     "username": "severine",
     "password": "severine",
@@ -114,6 +137,29 @@
     "password": "philippe",
     "local_directory": "C:\\Users\\Philippe\\OneDrive - RL&Kids\\Pictures\\FromPhones\\Philippe",
     "remote_host": "192.168.83.226",
+    "port": 2121,
+    "remote_directories": [
+      "/Pictures",
+      "/DCIM",
+      "/Telegram",
+      "/Threema",
+      "/Movies/Threema",
+      "/Android/media/com.whatsapp"
+    ],
+    "extensions": [
+      ".jpg",
+      ".jpeg",
+      ".mov",
+      ".mp4",
+      ".vid",
+      ".div"
+    ]
+  },
+  "philippe_zenbook": {
+    "username": "philippe",
+    "password": "philippe",
+    "local_directory": "C:\\Users\\Philippe\\OneDrive - RL&Kids\\Pictures\\FromPhones\\Philippe",
+    "remote_host": "192.168.1.67",
     "port": 2121,
     "remote_directories": [
       "/Pictures",

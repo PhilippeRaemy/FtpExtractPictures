@@ -4,6 +4,7 @@ from copy import deepcopy
 from datetime import datetime
 from ftplib import FTP
 from os import listdir, path, remove
+from typing import List
 
 import click
 
@@ -17,6 +18,20 @@ with open(profiles_json) as j:
 def explode_profile(profile_name, username, password, host, port, local, directories, extensions, add_directories,
                     remove_directories, add_extensions, remove_extensions):
     profile = profiles[profile_name]
+    print('explode profile')
+    print(json.dumps({'profile_name':profile_name,
+                    'username':username,
+                    'password':password,
+                    'host':host,
+                    'port':port,
+                    'local':local,
+                    'directories':directories,
+                    'extensions':extensions,
+                    'add_directories':add_directories,
+                    'remove_directories':remove_directories,
+                    'add_extensions':add_extensions,
+                    'remove_extensions':remove_extensions
+    }, indent=4))
     return username if username else profile['username'], \
            password if password else profile['password'], \
            local if local else profile['local_directory'], \
@@ -56,9 +71,9 @@ def profile():
 @click.option('--host', required=False, default=None, type=str)
 @click.option('--port', required=False, default=None, type=int)
 @click.option('--local', required=False, default=None, type=str)
-@click.option('--extensions', required=False, default=[], type=str)
-@click.option('--add_extensions', required=False, default=[], type=str)
-@click.option('--remove_extensions', required=False, default=[], type=str)
+@click.option('--extensions', required=False, default=[], type=List[str])
+@click.option('--add_extensions', required=False, default=[], type=List[str])
+@click.option('--remove_extensions', required=False, default=[], type=List[str])
 def _explore(profile: str, directory: str, username, password, host, port, local,
              extensions,
              add_extensions, remove_extensions):
@@ -172,14 +187,20 @@ def edit_profile(profile, username=None, password=None, host=None, port=None, lo
 @click.option('--host', required=False, default=None, type=str)
 @click.option('--port', required=False, default=None, type=int)
 @click.option('--local', required=False, default=None, type=str)
-@click.option('--directories', required=False, default=[], type=str)
-@click.option('--extensions', required=False, default=[], type=str)
-@click.option('--add_directories', required=False, default=[], type=str)
-@click.option('--remove_directories', required=False, default=[], type=str)
-@click.option('--add_extensions', required=False, default=[], type=str)
-@click.option('--remove_extensions', required=False, default=[], type=str)
-def _extract(profile, username, password, host, port, local, directories, extensions, add_directories,
-             remove_directories, add_extensions, remove_extensions):
+# @click.option('--directories', required=False, default=[], type=List[str])
+# @click.option('--extensions', required=False, default=[], type=List[str])
+# @click.option('--add_directories', required=False, default=[], type=List[str])
+# @click.option('--remove_directories', required=False, default=[], type=List[str])
+# @click.option('--add_extensions', required=False, default=[], type=List[str])
+# @click.option('--remove_extensions', required=False, default=[], type=List[str])
+def _extract(profile, username, password, host, port, local): #, directories, extensions, add_directories,             remove_directories, add_extensions, remove_extensions):
+    directories=[]
+    extensions=[]
+    add_directories=[]
+    remove_directories=[]
+    add_extensions=[]
+    remove_extensions=[]
+
     username, password, local_directory, remote_host, port, remote_directories, extensions \
         = explode_profile(profile, username, password, host, port, local,
                           directories, extensions,
@@ -205,29 +226,33 @@ def _extract(profile, username, password, host, port, local, directories, extens
                 ts = utc_datetime.timestamp()
                 return utc_datetime + (datetime.fromtimestamp(ts) - datetime.utcfromtimestamp(ts))
 
-            def deep_list(directory: str, min_date, recurse):
+            def deep_list(directory: str, recurse):
                 for name, attributes in ftp.mlsd(directory):
                     sub_directory = f'{directory}/{name}'
                     if attributes['type'] == 'dir' and sub_directory not in exclusions and recurse:
-                        for (d, n, a) in deep_list(sub_directory, min_date, recurse):
-                            yield d, n, a
+                        for (d, n, a, m) in deep_list(sub_directory, recurse):
+                            yield d, n, a, m
                     else:
                         modify = attributes['modify'] = datetime_from_utc_to_local(
                             datetime.strptime(attributes['modify'],
                                               '%Y%m%d%H%M%S.%f')) if 'modify' in attributes else None
-                        if modify > min_date and ext_re.match(name):
-                            yield directory, name, attributes
+                        if ext_re.match(name):
+                            yield directory, name, attributes, modify
 
             for remote_directory in remote_directories:
-                for (d, n, a) in deep_list(remote_directory, date_threshold, recurse=True):
+                print(remote_directory)
+                for (d, n, a, m) in deep_list(remote_directory, recurse=True):
                     file = path.join(local_directory, n)
                     msg = f'Getting {file} from {d}/{n} ({int(a["size"]) / 1024 / 1024:,.3f} Mb)...'
-                    if path.isfile(file) and path.getsize(file) == int(a["size"]):
+                    if m < date_threshold:
+                        pass
+                        # print(f'{msg} is before date threshold')
+                    elif path.isfile(file) and path.getsize(file) == int(a["size"]):
                         print(f'{msg} already exists')
                     else:
-                        print(msg)
+                        print(msg, end='')
                         ftp.retrbinary('RETR ' + d + '/' + n, open(file, 'wb').write)
-                        print(f'{msg} Done.')
+                        print(' Done.')
 
         date_threshold = datetime.now()
 
