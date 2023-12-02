@@ -19,32 +19,32 @@ def explode_profile(profile_name, username, password, host, port, local, directo
                     remove_directories, add_extensions, remove_extensions):
     profile = profiles[profile_name]
     print('explode profile')
-    print(json.dumps({'profile_name':profile_name,
-                    'username':username,
-                    'password':password,
-                    'host':host,
-                    'port':port,
-                    'local':local,
-                    'directories':directories,
-                    'extensions':extensions,
-                    'add_directories':add_directories,
-                    'remove_directories':remove_directories,
-                    'add_extensions':add_extensions,
-                    'remove_extensions':remove_extensions
-    }, indent=4))
+    print(json.dumps({'profile_name': profile_name,
+                      'username': username,
+                      'password': password,
+                      'host': host,
+                      'port': port,
+                      'local': local,
+                      'directories': directories,
+                      'extensions': extensions,
+                      'add_directories': add_directories,
+                      'remove_directories': remove_directories,
+                      'add_extensions': add_extensions,
+                      'remove_extensions': remove_extensions
+                      }, indent=4))
     return username if username else profile['username'], \
-           password if password else profile['password'], \
-           local if local else profile['local_directory'], \
-           host if host else profile['remote_host'], \
-           port if port else profile['port'], \
-           directories if directories else \
-               set(profile['remote_directories']) \
-                   .union(add_directories if add_directories else []) \
-                   .difference(remove_directories if remove_directories else []), \
-           extensions if extensions else \
-               set(profile['extensions']) \
-                   .union(add_extensions if add_extensions else add_extensions) \
-                   .difference(remove_extensions if remove_extensions else remove_extensions)
+        password if password else profile['password'], \
+        local if local else profile['local_directory'], \
+        host if host else profile['remote_host'], \
+        port if port else profile['port'], \
+        directories if directories else \
+            set(profile['remote_directories']) \
+                .union(add_directories if add_directories else []) \
+                .difference(remove_directories if remove_directories else []), \
+        extensions if extensions else \
+            set(profile['extensions']) \
+                .union(add_extensions if add_extensions else add_extensions) \
+                .difference(remove_extensions if remove_extensions else remove_extensions)
 
 
 @click.group()
@@ -193,13 +193,14 @@ def edit_profile(profile, username=None, password=None, host=None, port=None, lo
 # @click.option('--remove_directories', required=False, default=[], type=List[str])
 # @click.option('--add_extensions', required=False, default=[], type=List[str])
 # @click.option('--remove_extensions', required=False, default=[], type=List[str])
-def _extract(profile, username, password, host, port, local): #, directories, extensions, add_directories,             remove_directories, add_extensions, remove_extensions):
-    directories=[]
-    extensions=[]
-    add_directories=[]
-    remove_directories=[]
-    add_extensions=[]
-    remove_extensions=[]
+def _extract(profile, username=None, password=None, host=None, port=None,
+             local=None):  # , directories, extensions, add_directories,             remove_directories, add_extensions, remove_extensions):
+    directories = []
+    extensions = []
+    add_directories = []
+    remove_directories = []
+    add_extensions = []
+    remove_extensions = []
 
     username, password, local_directory, remote_host, port, remote_directories, extensions \
         = explode_profile(profile, username, password, host, port, local,
@@ -270,7 +271,7 @@ def _extract(profile, username, password, host, port, local): #, directories, ex
 
 if __name__ == '__main__':
     _explore()
-    # extract(profile="philippe")
+    # _extract(profile="philippe")
     # explore("philippe", '/')
     # extract("severine")
     # explore("severine", '/Pictures/Screenshots')
