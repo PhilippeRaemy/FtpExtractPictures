@@ -1,8 +1,9 @@
 from functools import reduce
+from importlib.metadata import requires
 
 import click
 
-from Phonetap import ftp_extract_pictures, profiles
+from Phonetap import ftp_extract_pictures, profiles, pictures
 
 
 @click.group()
@@ -18,6 +19,11 @@ def ftp():
 
 @cli.group()
 def profile():
+    """profile operations"""
+
+
+@cli.group()
+def picture():
     """profile operations"""
 
 
@@ -90,3 +96,11 @@ def extract(profile, username, password, host, port, local,
                                  directories, extensions,
                                  add_directories, remove_directories,
                                  add_extensions, remove_extensions)
+
+
+@picture.command('compare')
+@click.option('--first', required=True, help='The first picture to compare')
+@click.option('--second', required=True, help='The second picture to compare')
+@click.option('--show', required=False, is_flag=True, help='Open the pictures in system pictures viewer')
+def pictures_compare(**kwargs):
+    pictures.compare(**kwargs)
