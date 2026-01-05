@@ -104,3 +104,15 @@ def extract(profile, username, password, host, port, local,
 @click.option('--show', required=False, is_flag=True, help='Open the pictures in system pictures viewer')
 def pictures_compare(**kwargs):
     pictures.compare(**kwargs)
+
+@picture.command('deduplicate')
+@click.option('--folder', required=True, help='The root folder')
+@click.option('--dry-run', required=False, is_flag=True, help='Only show similarities')
+@click.option('--verbose', required=False, is_flag=True, help='verbose progress display')
+@click.option('--show', required=False, is_flag=True, help='Open the pictures in system pictures viewer')
+def pictures_deduplicate(**kwargs):
+    pictures.deduplicate(**kwargs)
+
+if __name__ == '__main__':
+    print('in main')
+    cli()
