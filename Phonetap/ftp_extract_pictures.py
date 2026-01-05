@@ -2,49 +2,13 @@ import re
 from datetime import datetime
 from ftplib import FTP
 from os import listdir, path, remove
-from typing import List
-
-import click
 
 from profiles import explode_profile
 
-PROFILES_JSON = 'profiles.json'
-profiles_json = path.sep.join(path.realpath(__file__).split(path.sep)[:-1] + [PROFILES_JSON])
 
-with open(profiles_json) as j:
-    pass
-
-
-@click.group()
-@click.version_option()
-def cli():
-    """Handle pictures from phone via FTP"""
-
-
-@cli.group()
-def ftp():
-    """FTP operations"""
-
-
-@cli.group()
-def profile():
-    """profile operations"""
-
-
-@ftp.command("explore")
-@click.option('--profile', prompt='profile name')
-@click.option('--directory', prompt='root directory')
-@click.option('--username', required=False, default=None, type=str)
-@click.option('--password', required=False, default=None, type=str)
-@click.option('--host', required=False, default=None, type=str)
-@click.option('--port', required=False, default=None, type=int)
-@click.option('--local', required=False, default=None, type=str)
-@click.option('--extensions', required=False, default=[], type=List[str])
-@click.option('--add_extensions', required=False, default=[], type=List[str])
-@click.option('--remove_extensions', required=False, default=[], type=List[str])
-def _explore(profile: str, directory: str, username, password, host, port, local,
-             extensions,
-             add_extensions, remove_extensions):
+def explore(profile: str, directory: str, username, password, host, port, local,
+            extensions,
+            add_extensions, remove_extensions):
     username, password, _, remote_host, port, _, _ = explode_profile(profile, username, password, host, port, local,
                                                                      [], extensions,
                                                                      [], [],
@@ -77,34 +41,10 @@ def remove_timestamp_file(local_directory):
     return date_threshold, (lambda _: remove(file_full_name)) if file_full_name else None
 
 
-@profile.command()
-@click.option('--n', default=3)
-def dots(n):
-    click.echo('.' * n)
-
-
-@ftp.command('extract')
-@click.option('--profile', prompt='profile name')
-@click.option('--username', required=False, default=None, type=str)
-@click.option('--password', required=False, default=None, type=str)
-@click.option('--host', required=False, default=None, type=str)
-@click.option('--port', required=False, default=None, type=int)
-@click.option('--local', required=False, default=None, type=str)
-# @click.option('--directories', required=False, default=[], type=List[str])
-# @click.option('--extensions', required=False, default=[], type=List[str])
-# @click.option('--add_directories', required=False, default=[], type=List[str])
-# @click.option('--remove_directories', required=False, default=[], type=List[str])
-# @click.option('--add_extensions', required=False, default=[], type=List[str])
-# @click.option('--remove_extensions', required=False, default=[], type=List[str])
-def _extract(profile, username=None, password=None, host=None, port=None,
-             local=None):  # , directories, extensions, add_directories,             remove_directories, add_extensions, remove_extensions):
-    directories = []
-    extensions = []
-    add_directories = []
-    remove_directories = []
-    add_extensions = []
-    remove_extensions = []
-
+def extract(profile, username, password, host, port, local,
+            directories, extensions,
+            add_directories, remove_directories,
+            add_extensions, remove_extensions):
     username, password, local_directory, remote_host, port, remote_directories, extensions \
         = explode_profile(profile, username, password, host, port, local,
                           directories, extensions,
@@ -173,7 +113,7 @@ def _extract(profile, username=None, password=None, host=None, port=None,
 
 
 if __name__ == '__main__':
-    _explore()
+    explore()
     # _extract(profile="philippe")
     # explore("philippe", '/')
     # extract("severine")

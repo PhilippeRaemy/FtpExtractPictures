@@ -1,27 +1,35 @@
 import json
 from copy import deepcopy
+from os import path
 
 import click
 
-from ftp_extract_pictures import profile, profiles_json, j
+import Phonetap.phonetap_cli
+from Phonetap.phonetap_cli import cli
+
+PROFILES_JSON = 'profiles.json'
+profiles_json = path.sep.join(path.realpath(__file__).split(path.sep)[:-1] + [PROFILES_JSON])
+
+with open(profiles_json) as j:
+    pass
 
 
 def explode_profile(profile_name, username, password, host, port, local, directories, extensions, add_directories,
                     remove_directories, add_extensions, remove_extensions):
     profile = profiles[profile_name]
     print('explode profile')
-    print(json.dumps({'profile_name': profile_name,
-                      'username': username,
-                      'password': password,
-                      'host': host,
-                      'port': port,
-                      'local': local,
-                      'directories': directories,
-                      'extensions': extensions,
-                      'add_directories': add_directories,
+    print(json.dumps({'profile_name'      : profile_name,
+                      'username'          : username,
+                      'password'          : password,
+                      'host'              : host,
+                      'port'              : port,
+                      'local'             : local,
+                      'directories'       : directories,
+                      'extensions'        : extensions,
+                      'add_directories'   : add_directories,
                       'remove_directories': remove_directories,
-                      'add_extensions': add_extensions,
-                      'remove_extensions': remove_extensions
+                      'add_extensions'    : add_extensions,
+                      'remove_extensions' : remove_extensions
                       }, indent=4))
     return username if username else profile['username'], \
         password if password else profile['password'], \
@@ -38,24 +46,10 @@ def explode_profile(profile_name, username, password, host, port, local, directo
                 .difference(remove_extensions if remove_extensions else remove_extensions)
 
 
-@profile.command('edit')
-@click.option('--profile', required=True)
-@click.option('--username', required=False, default=None, type=str)
-@click.option('--password', required=False, default=None, type=str)
-@click.option('--host', required=False, default=None, type=str)
-@click.option('--port', required=False, default=None, type=int)
-@click.option('--local', required=False, default=None, type=str)
-@click.option('--directories', required=False, default=None, type=str)
-@click.option('--extensions', required=False, default=None, type=str)
-@click.option('--add_directories', required=False, default=None, type=str)
-@click.option('--remove_directories', required=False, default=None, type=str)
-@click.option('--add_extensions', required=False, default=None, type=str)
-@click.option('--remove_extensions', required=False, default=None, type=str)
-@click.option('--model', required=False, default=None, type=str)
-def edit_profile(profile, username=None, password=None, host=None, port=None, local=None,
-                 directories=None, extensions=None,
-                 add_directories=None, remove_directories=None,
-                 add_extensions=None, remove_extensions=None, model='default'):
+def edit(profile, username, password, host, port, local,
+         directories, extensions,
+         add_directories, remove_directories,
+         add_extensions, remove_extensions, model):
     dic = deepcopy(profiles.get(profile, profiles.get(model, {})))
     if local:
         dic['local_directory'] = local
@@ -92,13 +86,13 @@ profiles = json.loads(j.read())
 
 
 @profile.command('list')
-def list_profiles():
+def list():
     print(f'Available profiles are :{profiles.keys()}')
 
 
 @profile.command('show')
 @click.option('--profile', default='')
-def show_profile(profile=None):
+def show(profile=None):
     if profile:
         print(json.dumps(profiles[profile], indent=2))
     else:
