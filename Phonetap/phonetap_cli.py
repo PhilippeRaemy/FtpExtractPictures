@@ -61,7 +61,7 @@ def edit_profile(profile, username, password, host, port, local,
 
 @profile.command('list')
 def list_profiles():
-    profiles.list()
+    profiles.list_profiles()
 
 
 @profile.command('show')

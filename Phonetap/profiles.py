@@ -2,16 +2,12 @@ import json
 from copy import deepcopy
 from os import path
 
-import click
-
-import Phonetap.phonetap_cli
-from Phonetap.phonetap_cli import cli
-
 PROFILES_JSON = 'profiles.json'
 profiles_json = path.sep.join(path.realpath(__file__).split(path.sep)[:-1] + [PROFILES_JSON])
 
 with open(profiles_json) as j:
-    pass
+    profiles = json.loads(j.read())
+
 
 
 def explode_profile(profile_name, username, password, host, port, local, directories, extensions, add_directories,
@@ -82,16 +78,10 @@ def edit(profile, username, password, host, port, local,
         j.write(dumps)
 
 
-profiles = json.loads(j.read())
-
-
-@profile.command('list')
-def list():
+def list_profiles():
     print(f'Available profiles are :{profiles.keys()}')
 
 
-@profile.command('show')
-@click.option('--profile', default='')
 def show(profile=None):
     if profile:
         print(json.dumps(profiles[profile], indent=2))

@@ -3,7 +3,7 @@ from datetime import datetime
 from ftplib import FTP
 from os import listdir, path, remove
 
-from profiles import explode_profile
+from Phonetap.profiles import explode_profile
 
 
 def explore(profile: str, directory: str, username, password, host, port, local,

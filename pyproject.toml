@@ -6,11 +6,12 @@ build-backend = "setuptools.build_meta"
 name = "Phonetap"
 description = "Extract, deduplicate and stow phone pictures"
 readme = "README.md"
+version = "0.1.0"
 requires-python = ">=3.13"
-license = {text = "Proprietary"}
-dynamic = ["version", "dependencies"]
+license = "MIT"
+dynamic = ["dependencies"]
 authors = [
-    {name = "yHilippe Raemy"}
+    { name = "Philippe Raemy" }
 ]
 
 [project.scripts]
@@ -20,7 +21,7 @@ phonetap = "Phonetap.phonetap_cli:cli"
 packages = ["Phonetap"]
 
 [tool.setuptools.dynamic]
-dependencies = {file = ["requirements.txt"]}
+dependencies = { file = ["requirements.txt"] }
 
 [tool.setuptools_scm]
 # Use git tags for versioning
