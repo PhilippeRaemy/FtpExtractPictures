@@ -3,7 +3,7 @@ from importlib.metadata import requires
 
 import click
 
-from Phonetap import ftp_extract_pictures, profiles, pictures
+from Phonetap import ftp_extract_pictures, profiles, pictures, stowage
 
 
 @click.group()
@@ -122,13 +122,14 @@ def pictures_deduplicate(**kwargs):
 
 
 @cli.command('stow')
-@click.option('--folder', required=True, help='The root folder')
+@click.option('--folder', required=False, default=".", help='The source folder')
+@click.option('--target', required=False, default=".", help='The root target folder')
 @click.option('--dry-run', required=False, is_flag=True, help='Only show work at hand')
 @click.option('--verbose', required=False, is_flag=True, help='verbose progress display')
 @click.option('--time-offset', required=False, type=int, default=0, help='Set time offset in hours')
 @click.option('--suffix', required=False, type=str, default='', help='Set optional picture name suffix')
 def stow_pictures(**kwargs):
-    pass
+    stowage.stow(**kwargs)
 
 
 if __name__ == '__main__':
