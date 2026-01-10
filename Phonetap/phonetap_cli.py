@@ -19,12 +19,16 @@ def ftp():
 
 @cli.group()
 def profile():
-    """profile operations"""
+    """profiles operations"""
 
 
 @cli.group()
 def picture():
-    """profile operations"""
+    """pictures operations"""
+
+# @cli.group()
+# def stow():
+#     """stow operations"""
 
 
 def profile_option(f):
@@ -115,6 +119,16 @@ def pictures_compare(**kwargs):
 @click.option('--show', required=False, is_flag=True, help='Open the pictures in system pictures viewer')
 def pictures_deduplicate(**kwargs):
     pictures.deduplicate(**kwargs)
+
+
+@cli.command('stow')
+@click.option('--folder', required=True, help='The root folder')
+@click.option('--dry-run', required=False, is_flag=True, help='Only show work at hand')
+@click.option('--verbose', required=False, is_flag=True, help='verbose progress display')
+@click.option('--time-offset', required=False, type=int, default=0, help='Set time offset in hours')
+@click.option('--suffix', required=False, type=str, default='', help='Set optional picture name suffix')
+def stow_pictures(**kwargs):
+    pass
 
 
 if __name__ == '__main__':
