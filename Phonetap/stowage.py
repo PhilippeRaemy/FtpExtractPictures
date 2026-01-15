@@ -1,11 +1,40 @@
 import os
 import shutil
+import trace
 from datetime import datetime, timedelta
 import re
 
+from Phonetap.utils import Tracer
 
-def stow(command: str, source: str, target: str, dry_run: bool, force: bool, verbose: bool, offset_hours: int,
-         suffix: str, filter: str, file_types: str, min_date: str, max_date: str):
+
+def stow(command: str,
+         source: str,
+         target: str,
+         dry_run: bool,
+         force: bool,
+         verbose: bool,
+         offset_hours: int,
+         suffix: str,
+         filter: str,
+         file_types: str,
+         min_date: str,
+         max_date: str):
+    tracer = Tracer(verbose=verbose)
+
+    tracer.chat("Starting stow",
+                command=command,
+                source=source,
+                target=target,
+                dry_run=dry_run,
+                force=force,
+                verbose=verbose,
+                offset_hours=offset_hours,
+                suffix=suffix,
+                filter=filter,
+                file_types=file_types,
+                min_date=min_date,
+                max_date=max_date,
+                )
     extensions = ['.' + e for e in file_types.split(',')]
     if filter:
         filter_re = re.compile(filter.replace('.', '\\.').replace('?', '.').replace('*', '.*'), re.IGNORECASE)
@@ -18,7 +47,9 @@ def stow(command: str, source: str, target: str, dry_run: bool, force: bool, ver
     def find_target(creation_day: datetime):
         creation_day = creation_day.date()
         if creation_day in target_folders:
-            return target_folders[creation_day]
+            found = target_folders[creation_day]
+            tracer.chat(found_folder=found)
+            return found
 
         target_root = os.path.join(target,
                                    creation_day.strftime("%Y"),
@@ -34,14 +65,22 @@ def stow(command: str, source: str, target: str, dry_run: bool, force: bool, ver
         target_folder = os.path.join(target_root, found_leaf)
         target_folders[creation_day] = target_folder
         if not os.path.exists(target_folder):
+            if dry_run:
+                trace.trace(create_folder=target_folder)
+            else:
+                trace.chat(creating_folder=target_folder)
             os.makedirs(target_folder, exist_ok=True)
-            return target_folder
+        else:
+            trace.chat(using_folder=target_folder)
+        return target_folder
 
     for folder, _, files in os.walk(source):
         for file in files:
             if not any((file.endswith(e) for e in extensions)):
+                tracer.chat(ignore=file)
                 continue
             if filter and not filter_re.match(file):
+                tracer.chat(filter=file)
                 continue
             path_to_file = os.path.join(folder, file)
             ma = re_timestamp.match(file)
@@ -67,10 +106,16 @@ def stow(command: str, source: str, target: str, dry_run: bool, force: bool, ver
                                     f"{creation_time.strftime("%Y-%m-%d_%H_%m_%S")} {head}{tail}{suffix}.{ext}")
             if os.path.exists(new_file):
                 if force:
+                    tracer.chat(replace=new_file)
                     os.remove(new_file)
                 else:
                     continue
+
             if command == 'copy':
-                shutil.copy(path_to_file, new_file)
+                tracer.trace(copy={'from': path_to_file, 'to': new_file})
+                if dry_run:
+                    shutil.copy(path_to_file, new_file)
             else:
-                shutil.move(path_to_file, new_file)
+                tracer.trace(move={'from': path_to_file, 'to': new_file})
+                if dry_run:
+                    shutil.move(path_to_file, new_file)
