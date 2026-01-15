@@ -37,40 +37,40 @@ def stow(command: str, source: str, target: str, dry_run: bool, force: bool, ver
             os.makedirs(target_folder, exist_ok=True)
             return target_folder
 
-        for folder, _, files in os.walk(source):
-            for file in files:
-                if not any((file.endswith(e) for e in extensions)):
-                    continue
-                if filter and not filter_re.match(file):
-                    continue
-                path_to_file = os.path.join(folder, file)
-                ma = re_timestamp.match(file)
-                if ma:  # no need to rename
-                    ma_di = ma.groupdict()
-                    creation_time = datetime(
-                        int(ma_di['yyyy']), int(ma_di['MM']), int(ma_di['dd']),
-                        int(ma_di['hh']), int(ma_di['mm']), int(ma_di['ss']) if ma_di['ss'] else 0)
-                    head = ma_di['head'].strip()
-                    tail = ma_di['tail'].strip()
+    for folder, _, files in os.walk(source):
+        for file in files:
+            if not any((file.endswith(e) for e in extensions)):
+                continue
+            if filter and not filter_re.match(file):
+                continue
+            path_to_file = os.path.join(folder, file)
+            ma = re_timestamp.match(file)
+            if ma:  # no need to rename
+                ma_di = ma.groupdict()
+                creation_time = datetime(
+                    int(ma_di['yyyy']), int(ma_di['MM']), int(ma_di['dd']),
+                    int(ma_di['hh']), int(ma_di['mm']), int(ma_di['ss']) if ma_di['ss'] else 0)
+                head = ma_di['head'].strip()
+                tail = ma_di['tail'].strip()
+            else:
+                creation_time = os.path.getctime(path_to_file)
+                head = ''
+                chunks = file.strip().split('.')
+                tail = '.'.join(chunks[:-1])
+                ext = chunks[-1]
+            if offset_hours:
+                creation_time += timedelta(hours=offset_hours)
+            if not min_date <= creation_time <= max_date:
+                continue
+            target_folder = find_target(creation_time)
+            new_file = os.path.join(target_folder,
+                                    f"{creation_time.strftime("%Y-%m-%d_%H_%m_%S")} {head}{tail}{suffix}.{ext}")
+            if os.path.exists(new_file):
+                if force:
+                    os.remove(new_file)
                 else:
-                    creation_time = os.path.getctime(path_to_file)
-                    head = ''
-                    chunks = file.strip().split('.')
-                    tail = '.'.join(chunks[:-1])
-                    ext = chunks[-1]
-                if offset_hours:
-                    creation_time += timedelta(hours=offset_hours)
-                if not min_date <= creation_time <= max_date:
                     continue
-                target_folder = find_target(creation_time)
-                new_file = os.path.join(target_folder,
-                                        f"{creation_time.strftime("%Y-%m-%d_%H_%m_%S")} {head}{tail}{suffix}.{ext}")
-                if os.path.exists(new_file):
-                    if force:
-                        os.remove(new_file)
-                    else:
-                        continue
-                if command == 'copy':
-                    shutil.copy(path_to_file, new_file)
-                else:
-                    shutil.move(path_to_file, new_file)
+            if command == 'copy':
+                shutil.copy(path_to_file, new_file)
+            else:
+                shutil.move(path_to_file, new_file)
