@@ -7,5 +7,5 @@ PyWavelets==1.9.0
 scipy==1.16.3
 Send2Trash
 
-cmake==4.2.1
-face_recognition
+# cmake==4.2.1
+# face_recognition

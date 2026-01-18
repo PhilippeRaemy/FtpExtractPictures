@@ -115,7 +115,9 @@ def pictures_compare(**kwargs):
 @click.option('--folder', '-f', required=True, help='The root folder')
 @click.option('--file-types', '-y', required=False, type=str, default='jpg,jpeg,cr2,webp',
               help='File extensions of interest, comma-delimited, no wildcards')
-@click.option('--hash-size', '-z', required=False, type=int, default=128,
+@click.option('--algorithm', '-a', required=False, default='dhash', type=click.Choice(['average', 'dhash']),
+              help='The hash algorithm used')
+@click.option('--hash-size', '-z', required=False, type=int, default=64,
               help='the hash size. The number of comparison points is the square of the hash size')
 @click.option('--similarity', '-s', required=False, default=95, help='Similarity percentage')
 @click.option('--dry-run', '-n', required=False, is_flag=True, help='Only show similarities')

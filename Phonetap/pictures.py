@@ -12,6 +12,7 @@ from Phonetap.utils import Tracer
 
 class Picture:
     def __init__(self, image_file, hash_size):
+        self.hash_size = hash_size
         self.file = image_file
         im = Image.open(image_file)
         self._ave_hash = None
@@ -88,7 +89,7 @@ def compare(first, second, show, hash_size):
     print(f"Similarity Factor: {similarity_factor:.2f}%")
 
 
-def deduplicate(folder, dry_run, verbose, show, hash_size, file_types, similarity):
+def deduplicate(folder, dry_run, verbose, show, hash_size, algorithm, file_types, similarity):
     tracer = Tracer(verbose=verbose or dry_run)
     itracer = Tracer(verbose=verbose or dry_run, indent=2)
     tracer.chat('deduplicate',
@@ -111,7 +112,9 @@ def deduplicate(folder, dry_run, verbose, show, hash_size, file_types, similarit
             except UnidentifiedImageError as ex:
                 tracer.trace(str(ex))
                 continue
-            hash = picture.ave_hash
+            hash = picture.ave_hash if algorithm == 'average' else picture.dhash if algorithm == 'dhash' else None
+            if hash is None:
+                raise ValueError(f'Invalid hash algorithm {algorithm}.')
             if max_distance == 0:
                 max_distance = len(hash.hash.flatten())  # This will typically be 64 for an average_hash
             similar_hash = next((k for k in pic_dic.keys() if 1 - (k - hash) / max_distance >= similarity), None)
