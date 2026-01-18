@@ -1,9 +1,13 @@
 import os
+import subprocess
 from datetime import datetime
 
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from pathlib import Path
 import imagehash
+from send2trash import send2trash
+
+from Phonetap.utils import Tracer
 
 
 class Picture:
@@ -17,6 +21,21 @@ class Picture:
         self.size = stats.st_size
         self.creation_timestamp = stats.st_ctime
         self.creation_date = datetime.fromtimestamp(self.creation_timestamp)
+
+    def __lt__(self, other) -> bool:
+        if not isinstance(other, Picture):
+            raise ValueError(f'cannot compare a {type(self).__name__} with a {type(other).__name__}')
+        return (self.pixels < other.pixels
+                or self.size < other.size
+                or self.creation_timestamp > other.creation_timestamp)
+
+    def __gt__(self, other) -> bool:
+        return other < self
+
+    def similarity(self, other):
+        if not isinstance(other, Picture):
+            raise ValueError(f'cannot compare a {type(self).__name__} with a {type(other).__name__}')
+        return 1 - (self.hash - other.hash) / len(self.hash.flatten())
 
 
 def get_hash(image, show, hash_size):
@@ -45,15 +64,29 @@ def compare(first, second, show, hash_size):
     print(f"Similarity Factor: {similarity_factor:.2f}%")
 
 
-def deduplicate(folder, dry_run, verbose, show, hash_size, similarity=0.8):
-    print('deduplicate')
+def deduplicate(folder, dry_run, verbose, show, hash_size, file_types, similarity):
+    tracer = Tracer(verbose=verbose or dry_run)
+    itracer = Tracer(verbose=verbose or dry_run, indent=2)
+    tracer.chat('deduplicate',
+                folder=folder,
+                dry_run=dry_run,
+                verbose=verbose,
+                show=show,
+                hash_size=hash_size,
+                similarity=similarity)
 
+    extensions = ['.' + e for e in file_types.split(',')]
+    similarity = similarity / 100  # entered as a percentage
     pic_dic = {}
     max_distance = 0
     for pic in os.listdir(folder):
-        if pic.endswith('.jpg'):
+        if any((pic.endswith(e) for e in extensions)):
             pic_file = os.path.join(folder, pic)
-            picture = Picture(pic_file)
+            try:
+                picture = Picture(pic_file, hash_size=hash_size)
+            except UnidentifiedImageError as ex:
+                tracer.trace(str(ex))
+                continue
             hash = picture.hash
             if max_distance == 0:
                 max_distance = len(hash.hash.flatten())  # This will typically be 64 for an average_hash
@@ -63,9 +96,30 @@ def deduplicate(folder, dry_run, verbose, show, hash_size, similarity=0.8):
                 if show:
                     pass
                     # im.show()
-                if verbose:
-                    print(f'{pic_file} is original')
+                tracer.chat(original=pic_file)
             else:
-                pic_dic[similar_hash]['images'].append(picture)
-                if verbose:
-                    print(f'{pic_file} is similar to {pic_dic[similar_hash]['file']}')
+                images = sorted(pic_dic[similar_hash]['images'] + [picture], reverse=True)
+                pic_dic[similar_hash]['images'] = images
+                tracer.chat(file=pic_file, similar_to=pic_dic[similar_hash]['file'])
+                if show:  # keep all the references and delay delete
+                    pic_dic[similar_hash]['file'] = pic_dic[similar_hash]['images'][0].file
+                else:
+                    for im in images[1:]:
+                        tracer.chat(redundant=im.file)
+                        send2trash(im.file)
+                    pic_dic[similar_hash]['images'] = images[1]
+    if show:
+        for hash, pics in pic_dic.items():
+            images = pics['images']
+            if len(images) < 2:
+                continue
+            for image in images:
+                subprocess.run(["cmd", '/c', 'start', image.file])
+            itracer.trace(
+                keep=images[0].file,
+                redundant={im.file: int(100 - (im.hash - hash) / max_distance * 100) for im in images[1:]}
+            )
+            input('Press enter to continue')
+            if not dry_run:
+                for im in images[1:]:
+                    send2trash(im.file)

@@ -9,11 +9,19 @@ class Tracer:
         self.start_time = datetime.now()
 
     def trace(self, *args, **kwargs):
-        print(json.dumps({'e': f'{(datetime.now() - self.start_time).total_seconds():.3f}',
-                          'm': args[0] if len(args) == 1 and not kwargs
-                          else ' '.join(str(args)) if not kwargs
-                          else kwargs if not args
-                          else {' '.join(str(args)): kwargs}}, indent=self.indent))
+        message = {'elapse': f'{(datetime.now() - self.start_time).total_seconds():.3f}'}
+        if len(args) == 0:
+            if kwargs:
+                message.update(kwargs)
+        else:
+            txt = ' '.join((str(a) for a in args))
+            if kwargs:
+                message[txt] = kwargs
+            else:
+                message['':txt]
+
+        print(json.dumps(message, indent=self.indent))
+
 
     def chat(self, *args, **kwargs):
         if self.verbose:
