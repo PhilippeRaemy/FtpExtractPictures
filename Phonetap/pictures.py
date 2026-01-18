@@ -14,8 +14,9 @@ class Picture:
     def __init__(self, image_file, hash_size):
         self.file = image_file
         im = Image.open(image_file)
-        self.hash = imagehash.average_hash(im, hash_size=hash_size)
-        self.pixels = im.width * im.height
+        self._ave_hash = None
+        self._dhash = None
+        self._pixels = None
         image_path = Path(image_file)
         stats = image_path.stat()
         self.size = stats.st_size
@@ -35,7 +36,30 @@ class Picture:
     def similarity(self, other):
         if not isinstance(other, Picture):
             raise ValueError(f'cannot compare a {type(self).__name__} with a {type(other).__name__}')
-        return 1 - (self.hash - other.hash) / len(self.hash.flatten())
+        return 1 - (self.ave_hash - other.ave_hash) / len(self.ave_hash.flatten())
+
+    @property
+    def ave_hash(self):
+        if not self._ave_hash:
+            im = Image.open(self.file)
+            self._pixels = im.width * im.height
+            self._ave_hash = imagehash.average_hash(im, hash_size=self.hash_size)
+        return self._ave_hash
+
+    @property
+    def dhash(self):
+        if not self._dhash:
+            im = Image.open(self.file)
+            self._pixels = im.width * im.height
+            self._dhash = imagehash.dhash(im, hash_size=self.hash_size)
+        return self._dhash
+
+    @property
+    def pixels(self):
+        if not self._pixels:
+            im = Image.open(self.file)
+            self._pixels = im.width * im.height
+        return self._pixels
 
 
 def get_hash(image, show, hash_size):
@@ -87,7 +111,7 @@ def deduplicate(folder, dry_run, verbose, show, hash_size, file_types, similarit
             except UnidentifiedImageError as ex:
                 tracer.trace(str(ex))
                 continue
-            hash = picture.hash
+            hash = picture.ave_hash
             if max_distance == 0:
                 max_distance = len(hash.hash.flatten())  # This will typically be 64 for an average_hash
             similar_hash = next((k for k in pic_dic.keys() if 1 - (k - hash) / max_distance >= similarity), None)
@@ -117,7 +141,7 @@ def deduplicate(folder, dry_run, verbose, show, hash_size, file_types, similarit
                 subprocess.run(["cmd", '/c', 'start', image.file])
             itracer.trace(
                 keep=images[0].file,
-                redundant={im.file: int(100 - (im.hash - hash) / max_distance * 100) for im in images[1:]}
+                redundant={im.file: int(100 - (im.ave_hash - hash) / max_distance * 100) for im in images[1:]}
             )
             input('Press enter to continue')
             if not dry_run:
