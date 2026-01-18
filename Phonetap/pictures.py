@@ -11,18 +11,24 @@ from Phonetap.utils import Tracer
 
 
 class Picture:
-    def __init__(self, image_file, hash_size):
+    def __init__(self, image_file, hash_size, algorithm):
         self.hash_size = hash_size
         self.file = image_file
         im = Image.open(image_file)
-        self._ave_hash = None
-        self._dhash = None
+        self._hash = None
         self._pixels = None
         image_path = Path(image_file)
         stats = image_path.stat()
         self.size = stats.st_size
         self.creation_timestamp = stats.st_ctime
         self.creation_date = datetime.fromtimestamp(self.creation_timestamp)
+
+        if algorithm == 'average':
+            self._get_hash = lambda im: imagehash.average_hash(im, hash_size=hash_size)
+        elif algorithm == 'dhash':
+            self._get_hash = lambda im: imagehash.dhash(im, hash_size=hash_size)
+        else:
+            raise ValueError(f"Invalid value for algorithm : {algorithm}")
 
     def __lt__(self, other) -> bool:
         if not isinstance(other, Picture):
@@ -37,23 +43,15 @@ class Picture:
     def similarity(self, other):
         if not isinstance(other, Picture):
             raise ValueError(f'cannot compare a {type(self).__name__} with a {type(other).__name__}')
-        return 1 - (self.ave_hash - other.ave_hash) / len(self.ave_hash.flatten())
+        return 1 - (self.hash - other.hash) / len(self.hash.flatten())
 
     @property
-    def ave_hash(self):
-        if not self._ave_hash:
+    def hash(self):
+        if not self._hash:
             im = Image.open(self.file)
             self._pixels = im.width * im.height
-            self._ave_hash = imagehash.average_hash(im, hash_size=self.hash_size)
-        return self._ave_hash
-
-    @property
-    def dhash(self):
-        if not self._dhash:
-            im = Image.open(self.file)
-            self._pixels = im.width * im.height
-            self._dhash = imagehash.dhash(im, hash_size=self.hash_size)
-        return self._dhash
+            self._hash = self._get_hash(im)
+        return self._hash
 
     @property
     def pixels(self):
@@ -98,6 +96,7 @@ def deduplicate(folder, dry_run, verbose, show, hash_size, algorithm, file_types
                 verbose=verbose,
                 show=show,
                 hash_size=hash_size,
+                algorithm=algorithm,
                 similarity=similarity)
 
     extensions = ['.' + e for e in file_types.split(',')]
@@ -108,13 +107,11 @@ def deduplicate(folder, dry_run, verbose, show, hash_size, algorithm, file_types
         if any((pic.endswith(e) for e in extensions)):
             pic_file = os.path.join(folder, pic)
             try:
-                picture = Picture(pic_file, hash_size=hash_size)
+                picture = Picture(pic_file, hash_size=hash_size, algorithm=algorithm)
             except UnidentifiedImageError as ex:
                 tracer.trace(str(ex))
                 continue
-            hash = picture.ave_hash if algorithm == 'average' else picture.dhash if algorithm == 'dhash' else None
-            if hash is None:
-                raise ValueError(f'Invalid hash algorithm {algorithm}.')
+            hash = picture.hash
             if max_distance == 0:
                 max_distance = len(hash.hash.flatten())  # This will typically be 64 for an average_hash
             similar_hash = next((k for k in pic_dic.keys() if 1 - (k - hash) / max_distance >= similarity), None)
@@ -142,9 +139,10 @@ def deduplicate(folder, dry_run, verbose, show, hash_size, algorithm, file_types
                 continue
             for image in images:
                 subprocess.run(["cmd", '/c', 'start', image.file])
+            best = images[0].file
             itracer.trace(
-                keep=images[0].file,
-                redundant={im.file: int(100 - (im.ave_hash - hash) / max_distance * 100) for im in images[1:]}
+                keep=best,
+                redundant={im.file: im.similarity(best) for im in images[1:]}
             )
             input('Press enter to continue')
             if not dry_run:
