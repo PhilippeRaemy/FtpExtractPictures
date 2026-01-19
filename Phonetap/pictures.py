@@ -118,17 +118,9 @@ def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorith
                     # im.show()
                 ptracer.chat(original=pic_file)
             else:
-                images = pic_dic[similar_hash]['images']
-                images.append(picture)
-                pic_dic[similar_hash]['images'] = sorted(images, reverse=True)
+                pic_dic[similar_hash]['images'] = sorted(pic_dic[similar_hash]['images'] + [picture])
                 tracer.chat(file=pic_file, similar_to=pic_dic[similar_hash]['file'])
-                if show:  # keep all the references and delay delete
-                    pic_dic[similar_hash]['file'] = pic_dic[similar_hash]['images'][0].file
-                else:
-                    for im in images[1:]:
-                        tracer.chat(redundant=im.file)
-                        send2trash(im.file)
-                    pic_dic[similar_hash]['images'] = images[1]
+
     for hash, pics in pic_dic.items():
         images = pics['images']
         if len(images) < 2:
