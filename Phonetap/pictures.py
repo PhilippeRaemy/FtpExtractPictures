@@ -45,7 +45,7 @@ class Picture:
     def similarity(self, other):
         if not isinstance(other, Picture):
             raise ValueError(f'cannot compare a {type(self).__name__} with a {type(other).__name__}')
-        return 1 - (self.hash - other.hash) / len(self.hash.flatten())
+        return 1 - (self.hash - other.hash) / len(self.hash.hash.flatten())
 
     @property
     def hash(self):
@@ -92,16 +92,8 @@ def compare(first, second, show, hash_size):
 def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorithm, similarity):
     dry_run = (run_mode == "dry")
     tracer = Tracer(verbose=verbose or dry_run)
+    ptracer = Tracer(verbose=verbose or dry_run, indent=None, newline='\r')
     itracer = Tracer(verbose=verbose or dry_run, indent=2)
-    tracer.chat('deduplicate',
-                folder=folder,
-                file_types=file_types,
-                run_mode=run_mode,
-                verbose=verbose,
-                show=show,
-                hash_size=hash_size,
-                algorithm=algorithm,
-                similarity=similarity)
 
     extensions = ['.' + e for e in file_types.split(',')]
     similarity = similarity / 100  # entered as a percentage
@@ -124,10 +116,11 @@ def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorith
                 if show:
                     pass
                     # im.show()
-                tracer.chat(original=pic_file)
+                ptracer.chat(original=pic_file)
             else:
-                images = sorted(pic_dic[similar_hash]['images'] + [picture], reverse=True)
-                pic_dic[similar_hash]['images'] = images
+                images = pic_dic[similar_hash]['images']
+                images.append(picture)
+                pic_dic[similar_hash]['images'] = sorted(images, reverse=True)
                 tracer.chat(file=pic_file, similar_to=pic_dic[similar_hash]['file'])
                 if show:  # keep all the references and delay delete
                     pic_dic[similar_hash]['file'] = pic_dic[similar_hash]['images'][0].file
@@ -140,27 +133,26 @@ def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorith
         images = pics['images']
         if len(images) < 2:
             continue
-        best = images[0].file
+        best = images[0]
         itracer.trace(
-            keep=best,
+            keep=best.file,
             redundant={im.file: im.similarity(best) for im in images[1:]}
         )
-        if show:
+        if show and run_mode in ('dry', 'bin', 'del'):
             for image in images:
                 subprocess.run(["cmd", '/c', 'start', image.file])
             input('Press enter to continue')
-        if run_mode=='dry':
+        if run_mode == 'dry':
             pass
-        elif run_mode=='bin':
+        elif run_mode == 'bin':
             for im in images[1:]:
                 send2trash(im.file)
-        elif run_mode=='del':
+        elif run_mode == 'del':
             for im in images[1:]:
                 os.remove(im.file)
         elif run_mode == 'shelve':
-            im=images[0]
-            shelf = '.'.join(im.file.split('.')[:-1]) # remove extension
+            im = images[0]
+            shelf = '.'.join(im.file.split('.')[:-1])  # remove extension
             os.makedirs(shelf, exist_ok=True)
             for im in images:
                 shutil.move(im.file, shelf)
-

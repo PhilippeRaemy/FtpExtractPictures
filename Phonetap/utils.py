@@ -3,13 +3,18 @@ import json
 
 
 class Tracer:
-    def __init__(self, verbose, indent=None):
+    def __init__(self, verbose, indent=None, newline='\n'):
+        self.newline = newline
         self.indent = indent
         self.verbose = verbose
         self.start_time = datetime.now()
+        self.count = 0
+        self.padding = ' ' * 10 if newline=='\r' else ''
 
     def trace(self, *args, **kwargs):
-        message = {'elapse': f'{(datetime.now() - self.start_time).total_seconds():.3f}'}
+        self.count += 1
+        elapse = (datetime.now() - self.start_time).total_seconds()
+        message = {'elapse[s]': f'{self.count}/{elapse :.3f}', 'pace[/s]': f'{self.count / elapse:.3f}'}
         if len(args) == 0:
             if kwargs:
                 message.update(kwargs)
@@ -20,8 +25,7 @@ class Tracer:
             else:
                 message['':txt]
 
-        print(json.dumps(message, indent=self.indent))
-
+        print(json.dumps(message, indent=self.indent)+self.padding, end=self.newline)
 
     def chat(self, *args, **kwargs):
         if self.verbose:
