@@ -35,11 +35,11 @@ class Picture:
             raise ValueError(f'cannot compare a {type(self).__name__} with a {type(other).__name__}')
         return (self.pixels < other.pixels  # fewer pixels
                 or (self.pixels == other.pixels and self.size < other.size)  # same resolution but smaller file
-                or (self.pixels == other.pixels and self.size == other.size  # same resolution and file size but later
+                or (self.pixels == other.pixels and self.size == other.size  # same resolution and file size but younger
                     and self.creation_timestamp > other.creation_timestamp))
 
     def __gt__(self, other) -> bool:
-        return other < self
+        return not self.__lt__(other)
 
     def similarity(self, other):
         if not isinstance(other, Picture):

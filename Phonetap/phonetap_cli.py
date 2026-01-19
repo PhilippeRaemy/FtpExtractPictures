@@ -5,8 +5,9 @@ import click
 
 from Phonetap import ftp_extract_pictures, profiles, pictures, stowage
 
+CONTEXT_SETTINGS = dict(show_default=True)
 
-@click.group()
+@click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option()
 def cli():
     """Handle pictures from phone via FTP"""
@@ -114,13 +115,20 @@ def pictures_compare(**kwargs):
 @picture.command('deduplicate')
 @click.option('--folder', '-f', required=True, help='The root folder')
 @click.option('--file-types', '-y', required=False, type=str, default='jpg,jpeg,cr2,webp',
-              help='File extensions of interest, comma-delimited, no wildcards')
+              help='\b\nFile extensions of interest, comma-delimited, no wildcards\n>')
 @click.option('--algorithm', '-a', required=False, default='dhash', type=click.Choice(['average', 'dhash']),
-              help='The hash algorithm used')
+              help='\b\nThe hash algorithm used\n>')
 @click.option('--hash-size', '-z', required=False, type=int, default=64,
-              help='the hash size. The number of comparison points is the square of the hash size')
-@click.option('--similarity', '-s', required=False, default=95, help='Similarity percentage')
-@click.option('--dry-run', '-n', required=False, is_flag=True, help='Only show similarities')
+              help='\b\nthe hash size. The number of comparison points is the square of the hash size\n>')
+@click.option('--similarity', '-s', required=False, default=95, help='Similarity percentage >')
+@click.option('--run-mode', '-r', required=False, default='dry',
+              type=click.Choice(['dry', 'shelve', 'bin', 'delete']),
+              help="""\b
+                  * dry   : Only show similarities
+                  * shelve: group similar files in a subfolder
+                  * bin   : move duplicates to the recycle bin
+                  * delete: permanently delete duplicates
+                  >""")
 @click.option('--verbose', '-v', required=False, is_flag=True, help='verbose progress display')
 @click.option('--show', '-w', required=False, is_flag=True, help='Open the pictures in system pictures viewer')
 def pictures_deduplicate(**kwargs):
