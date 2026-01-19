@@ -1,11 +1,14 @@
+import json
 from functools import reduce
 from importlib.metadata import requires
+import inspect
 
 import click
 
 from Phonetap import ftp_extract_pictures, profiles, pictures, stowage
 
 CONTEXT_SETTINGS = dict(show_default=True)
+
 
 @click.group(context_settings=CONTEXT_SETTINGS)
 @click.version_option()
@@ -58,50 +61,43 @@ def profile_option(f):
     # remove_extensions = []
 
 
+def echo(kwargs={}):
+    print(f"{inspect.stack()[1][3]}({json.dumps(kwargs)})")
+
+
 @profile.command('edit')
 @profile_option
 @click.option('--model', required=False, default='default', type=str)
-def edit_profile(profile, username, password, host, port, local,
-                 directories, extensions,
-                 add_directories, remove_directories,
-                 add_extensions, remove_extensions, model):
-    profiles.edit(profile, username, password, host, port, local,
-                  directories, extensions,
-                  add_directories, remove_directories,
-                  add_extensions, remove_extensions, model)
+def edit_profile(**kwargs):
+    echo(kwargs)
+    profiles.edit(**kwargs)
 
 
 @profile.command('list')
 def list_profiles():
+    echo()
     profiles.list_profiles()
 
 
 @profile.command('show')
 @click.option('--profile', default='')
-def show_profile(profile=None):
-    profiles.show(profile)
+def show_profile(**kwargs):
+    echo(kwargs)
+    profiles.show(**kwargs)
 
 
 @ftp.command("explore")
 @profile_option
-def explore(profile: str, directory: str, username, password, host, port, local,
-            extensions,
-            add_extensions, remove_extensions):
-    ftp_extract_pictures.explore(profile, directory, username, password, host, port, local,
-                                 extensions,
-                                 add_extensions, remove_extensions)
+def explore(**kwargs):
+    echo(kwargs)
+    ftp_extract_pictures.explore(**kwargs)
 
 
 @ftp.command('extract')
 @profile_option
-def extract(profile, username, password, host, port, local,
-            directories, extensions,
-            add_directories, remove_directories,
-            add_extensions, remove_extensions):
-    ftp_extract_pictures.extract(profile, username, password, host, port, local,
-                                 directories, extensions,
-                                 add_directories, remove_directories,
-                                 add_extensions, remove_extensions)
+def extract(**kwargs):
+    echo(kwargs)
+    ftp_extract_pictures.extract(**kwargs)
 
 
 @picture.command('compare')
@@ -109,6 +105,7 @@ def extract(profile, username, password, host, port, local,
 @click.option('--second', required=True, help='The second picture to compare')
 @click.option('--show', required=False, is_flag=True, help='Open the pictures in system pictures viewer')
 def pictures_compare(**kwargs):
+    echo(kwargs)
     pictures.compare(**kwargs)
 
 
@@ -132,6 +129,7 @@ def pictures_compare(**kwargs):
 @click.option('--verbose', '-v', required=False, is_flag=True, help='verbose progress display')
 @click.option('--show', '-w', required=False, is_flag=True, help='Open the pictures in system pictures viewer')
 def pictures_deduplicate(**kwargs):
+    echo(kwargs)
     pictures.deduplicate(**kwargs)
 
 
@@ -146,7 +144,7 @@ def stow_options(f):
         click.option('--suffix', '-x', required=False, type=str, default='', help='Set optional picture name suffix'),
         click.option('--filter', '-l', required=False, type=str, default='', help='Filter files with os-wildcards'),
         click.option('--file-types', '-y', required=False, type=str, default='jpg,jpeg,mov,mp3,mp4,cr2,webp,avi,wav',
-                     help='File extensions of interest, comma-delimited, no wildcards'),
+                     help='\b\nFile extensions of interest, comma-delimited, no wildcards\n'),
         click.option('--min-date', '-max', required=False, type=str, default='1900-01-01', help='Minimum file date'),
         click.option('--max-date', '-min', required=False, type=str, default='2500-01-01', help='Maximum file date'),
 
@@ -170,6 +168,7 @@ If such a directory does not exist, it is created.
 If such a directory does exist, or a similar directory with a name or
 a description suffix after the day date, this directory is used.
     """
+    echo(kwargs)
     stowage.stow('copy', **kwargs)
 
 
@@ -190,6 +189,7 @@ If such a directory does not exist, it is created.
 If such a directory does exist, or a similar directory with a name or
 a description suffix after the day date, this directory is used.
     """
+    echo(kwargs)
     stowage.stow('move', **kwargs)
 
 
