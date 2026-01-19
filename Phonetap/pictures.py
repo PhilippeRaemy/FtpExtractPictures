@@ -1,4 +1,5 @@
 import os
+import shutil
 import subprocess
 from datetime import datetime
 
@@ -88,12 +89,14 @@ def compare(first, second, show, hash_size):
     print(f"Similarity Factor: {similarity_factor:.2f}%")
 
 
-def deduplicate(folder, dry_run, verbose, show, hash_size, algorithm, file_types, similarity):
+def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorithm, similarity):
+    dry_run = (run_mode == "dry")
     tracer = Tracer(verbose=verbose or dry_run)
     itracer = Tracer(verbose=verbose or dry_run, indent=2)
     tracer.chat('deduplicate',
                 folder=folder,
-                dry_run=dry_run,
+                file_types=file_types,
+                run_mode=run_mode,
                 verbose=verbose,
                 show=show,
                 hash_size=hash_size,
@@ -133,19 +136,31 @@ def deduplicate(folder, dry_run, verbose, show, hash_size, algorithm, file_types
                         tracer.chat(redundant=im.file)
                         send2trash(im.file)
                     pic_dic[similar_hash]['images'] = images[1]
-    if show:
-        for hash, pics in pic_dic.items():
-            images = pics['images']
-            if len(images) < 2:
-                continue
+    for hash, pics in pic_dic.items():
+        images = pics['images']
+        if len(images) < 2:
+            continue
+        best = images[0].file
+        itracer.trace(
+            keep=best,
+            redundant={im.file: im.similarity(best) for im in images[1:]}
+        )
+        if show:
             for image in images:
                 subprocess.run(["cmd", '/c', 'start', image.file])
-            best = images[0].file
-            itracer.trace(
-                keep=best,
-                redundant={im.file: im.similarity(best) for im in images[1:]}
-            )
             input('Press enter to continue')
-            if not dry_run:
-                for im in images[1:]:
-                    send2trash(im.file)
+        if run_mode=='dry':
+            pass
+        elif run_mode=='bin':
+            for im in images[1:]:
+                send2trash(im.file)
+        elif run_mode=='del':
+            for im in images[1:]:
+                os.remove(im.file)
+        elif run_mode == 'shelve':
+            im=images[0]
+            shelf = '.'.join(im.file.split('.')[:-1]) # remove extension
+            os.makedirs(shelf, exist_ok=True)
+            for im in images:
+                shutil.move(im.file, shelf)
+
