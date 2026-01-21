@@ -3,13 +3,14 @@ import json
 
 
 class Tracer:
-    def __init__(self, verbose, indent=None, newline='\n'):
+    def __init__(self, verbose, indent=None, newline='\n', prefix='', padding=''):
+        self.prefix = prefix
         self.newline = newline
         self.indent = indent
         self.verbose = verbose
         self.start_time = datetime.now()
         self.count = 0
-        self.padding = ' ' * 10 if newline=='\r' else ''
+        self.padding = padding
 
     def trace(self, *args, **kwargs):
         self.count += 1
@@ -25,7 +26,7 @@ class Tracer:
             else:
                 message['':txt]
 
-        print(json.dumps(message, indent=self.indent)+self.padding, end=self.newline)
+        print(self.prefix + json.dumps(message, indent=self.indent)+self.padding, end=self.newline)
 
     def chat(self, *args, **kwargs):
         if self.verbose:

@@ -91,35 +91,37 @@ def compare(first, second, show, hash_size):
 
 def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorithm, similarity):
     dry_run = (run_mode == "dry")
-    tracer = Tracer(verbose=verbose or dry_run)
-    ptracer = Tracer(verbose=verbose or dry_run, indent=None, newline='\r')
-    itracer = Tracer(verbose=verbose or dry_run, indent=2)
+    tracer = Tracer(verbose=verbose or dry_run, prefix='\r')
+    ptracer = Tracer(verbose=verbose or dry_run, indent=None, newline='', prefix='\r', padding=' ' * 15)
+    itracer = Tracer(verbose=verbose or dry_run, indent=2, prefix='\r')
 
     extensions = ['.' + e for e in file_types.split(',')]
     similarity = similarity / 100  # entered as a percentage
     pic_dic = {}
     max_distance = 0
-    for pic in os.listdir(folder):
-        if any((pic.endswith(e) for e in extensions)):
-            pic_file = os.path.join(folder, pic)
-            try:
-                picture = Picture(pic_file, hash_size=hash_size, algorithm=algorithm)
-            except UnidentifiedImageError as ex:
-                tracer.trace(str(ex))
-                continue
-            hash = picture.hash
-            if max_distance == 0:
-                max_distance = len(hash.hash.flatten())  # This will typically be 64 for an average_hash
-            similar_hash = next((k for k in pic_dic.keys() if 1 - (k - hash) / max_distance >= similarity), None)
-            if similar_hash is None:
-                pic_dic[hash] = {'file': pic_file, 'images': [picture]}
-                if show:
-                    pass
-                    # im.show()
-                ptracer.chat(original=pic_file)
-            else:
-                pic_dic[similar_hash]['images'] = sorted(pic_dic[similar_hash]['images'] + [picture])
-                tracer.chat(file=pic_file, similar_to=pic_dic[similar_hash]['file'])
+    for sub, _, files in os.walk(folder):
+        sub = os.path.join(folder, sub)
+        for pic in files: # TODO: use os.walk
+            if any((pic.endswith(e) for e in extensions)):
+                pic_file = os.path.join(sub, pic)
+                try:
+                    picture = Picture(pic_file, hash_size=hash_size, algorithm=algorithm)
+                except UnidentifiedImageError as ex:
+                    tracer.trace(str(ex))
+                    continue
+                hash = picture.hash
+                if max_distance == 0:
+                    max_distance = len(hash.hash.flatten())  # This will typically be 64 for an average_hash
+                similar_hash = next((k for k in pic_dic.keys() if 1 - (k - hash) / max_distance >= similarity), None)
+                if similar_hash is None:
+                    pic_dic[hash] = {'file': pic_file, 'images': [picture]}
+                    if show:
+                        pass
+                        # im.show()
+                    ptracer.chat(original=pic_file)
+                else:
+                    pic_dic[similar_hash]['images'] = sorted(pic_dic[similar_hash]['images'] + [picture])
+                    tracer.chat(file=pic_file, similar_to=pic_dic[similar_hash]['file'])
 
     for hash, pics in pic_dic.items():
         images = pics['images']
