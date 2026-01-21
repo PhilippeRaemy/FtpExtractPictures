@@ -107,7 +107,7 @@ def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorith
     max_distance = 0
     for sub, _, files in os.walk(folder):
         sub = os.path.join(folder, sub)
-        for pic in files:  # TODO: use os.walk
+        for pic in files:
             if any((pic.endswith(e) for e in extensions)):
                 pic_file = os.path.join(sub, pic)
                 try:
