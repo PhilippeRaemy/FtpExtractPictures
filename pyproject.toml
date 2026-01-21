@@ -1,0 +1,37 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel", "setuptools-scm>=8.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "Phonetap"
+description = "Extract, deduplicate and stow phone pictures"
+readme = "README.md"
+version = "0.1.0"
+requires-python = ">=3.13"
+license = "MIT"
+dynamic = ["dependencies"]
+authors = [
+    { name = "Philippe Raemy" }
+]
+
+[project.scripts]
+phonetap = "Phonetap.phonetap_cli:cli"
+
+[tool.setuptools]
+packages = ["Phonetap"]
+
+[tool.setuptools.dynamic]
+dependencies = { file = ["requirements.txt"] }
+
+[tool.setuptools_scm]
+# Use git tags for versioning
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.1",
+    "pytest-cov",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["."]
+python_files = "test_*.py"
