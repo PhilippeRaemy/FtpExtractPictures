@@ -18,6 +18,7 @@ class Picture:
         im = Image.open(image_file)
         self._hash = None
         self._pixels = None
+        self._shape = None
         image_path = Path(image_file)
         stats = image_path.stat()
         self.size = stats.st_size
@@ -30,6 +31,9 @@ class Picture:
             self._get_hash = lambda im: imagehash.dhash(im, hash_size=hash_size)
         else:
             raise ValueError(f"Invalid value for algorithm : {algorithm}")
+
+    def __str__(self):
+        return f'{self.file}, {self.size / 1048576:.1f}Mb, {self.pixels / 1048576:.1f}Mpix'
 
     def __lt__(self, other) -> bool:
         if not isinstance(other, Picture):
@@ -52,6 +56,7 @@ class Picture:
         if not self._hash:
             im = Image.open(self.file)
             self._pixels = im.width * im.height
+            self._shape = (im.width, im.height)
             self._hash = self._get_hash(im)
         return self._hash
 
@@ -60,6 +65,7 @@ class Picture:
         if not self._pixels:
             im = Image.open(self.file)
             self._pixels = im.width * im.height
+            self._shape = (im.width, im.height)
         return self._pixels
 
 
@@ -101,7 +107,7 @@ def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorith
     max_distance = 0
     for sub, _, files in os.walk(folder):
         sub = os.path.join(folder, sub)
-        for pic in files: # TODO: use os.walk
+        for pic in files:  # TODO: use os.walk
             if any((pic.endswith(e) for e in extensions)):
                 pic_file = os.path.join(sub, pic)
                 try:
@@ -120,7 +126,7 @@ def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorith
                         # im.show()
                     ptracer.chat(original=pic_file)
                 else:
-                    pic_dic[similar_hash]['images'] = sorted(pic_dic[similar_hash]['images'] + [picture])
+                    pic_dic[similar_hash]['images'] = sorted(pic_dic[similar_hash]['images'] + [picture], reverse=True)
                     tracer.chat(file=pic_file, similar_to=pic_dic[similar_hash]['file'])
 
     for hash, pics in pic_dic.items():
@@ -129,8 +135,8 @@ def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorith
             continue
         best = images[0]
         itracer.trace(
-            keep=best.file,
-            redundant={im.file: im.similarity(best) for im in images[1:]}
+            keep=str(best),
+            redundant={str(im): f'{im.similarity(best) * 100:.1f}%' for im in images[1:]}
         )
         if show and run_mode in ('dry', 'bin', 'del'):
             for image in images:
