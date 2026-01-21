@@ -143,7 +143,7 @@ def stow_options(f):
         click.option('--offset-hours', '-o', required=False, type=int, default=0, help='Set time offset in hours'),
         click.option('--suffix', '-x', required=False, type=str, default='', help='Set optional picture name suffix'),
         click.option('--filter', '-l', required=False, type=str, default='', help='Filter files with os-wildcards'),
-        click.option('--file-types', '-y', required=False, type=str, default='jpg,jpeg,mov,mp3,mp4,cr2,webp,avi,wav',
+        click.option('--file-types', '-y', required=False, type=str, default='jpg,jpeg,mov,mp3,mp4,cr2,webp,avi,wav,m4a',
                      help='\b\nFile extensions of interest, comma-delimited, no wildcards\n'),
         click.option('--min-date', '-max', required=False, type=str, default='1900-01-01', help='Minimum file date'),
         click.option('--max-date', '-min', required=False, type=str, default='2500-01-01', help='Maximum file date'),
