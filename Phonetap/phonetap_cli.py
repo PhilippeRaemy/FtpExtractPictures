@@ -104,6 +104,10 @@ def extract(**kwargs):
 @click.option('--first', required=True, help='The first picture to compare')
 @click.option('--second', required=True, help='The second picture to compare')
 @click.option('--show', required=False, is_flag=True, help='Open the pictures in system pictures viewer')
+@click.option('--algorithm', '-a', required=False, default='dhash', type=click.Choice(['average', 'dhash']),
+              help='\b\nThe hash algorithm used\n>')
+@click.option('--hash-size', '-z', required=False, type=int, default=64,
+              help='\b\nthe hash size. The number of comparison points is the square of the hash size\n>')
 def pictures_compare(**kwargs):
     echo(kwargs)
     pictures.compare(**kwargs)

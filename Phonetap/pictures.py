@@ -68,6 +68,11 @@ class Picture:
             self._shape = (im.width, im.height)
         return self._pixels
 
+    def show(self):
+        results = subprocess.run(["cmd", '/c', 'start', self.file], capture_output=True)
+        # print(f"Subprocess file location: {subprocess.__file__}")
+        # print(f"{'*'*40}\n{results.stderr}\n{'='*40}\n{results.stdout}\n{'*'*40}")
+
 
 def get_hash(image, show, hash_size):
     im = Image.open(image)
@@ -76,24 +81,13 @@ def get_hash(image, show, hash_size):
     return im, imagehash.average_hash(im, hash_size=hash_size)
 
 
-def compare(first, second, show, hash_size):
-    # Load the images
-    im1, hash1 = get_hash(first, show, hash_size)
-    im2, hash2 = get_hash(second, show, hash_size)
-
-    # 1. Calculate the Hamming Distance (D)
-    # The distance is the number of bits that are different.
-    distance = hash1 - hash2  # This subtraction is overloaded to compute the Hamming distance
-
-    # 2. Get the maximum possible distance
-    MAX_DISTANCE = len(hash1.hash.flatten())  # This will typically be 64 for an average_hash
-
-    # 3. Calculate the Similarity Factor (Percentage)
-    similarity_factor = 100 * (1 - distance / MAX_DISTANCE)
-
-    print(f"Hamming Distance: {distance}")
-    print(f"Similarity Factor: {similarity_factor:.2f}%")
-
+def compare(first, second, show, algorithm, hash_size):
+    pic1 = Picture(first, hash_size, algorithm)
+    pic2 = Picture(second, hash_size, algorithm)
+    print(f"{pic1}\n{pic2}\nSimilarity Factor: {pic1.similarity(pic2) * 100:.2f}%")
+    if show:
+        pic1.show()
+        pic2.show()
 
 def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorithm, similarity):
     dry_run = (run_mode == "dry")
@@ -140,7 +134,7 @@ def deduplicate(folder, file_types, run_mode, verbose, show, hash_size, algorith
         )
         if show and run_mode in ('dry', 'bin', 'del'):
             for image in images:
-                subprocess.run(["cmd", '/c', 'start', image.file])
+                image.show()
             input('Press enter to continue')
         if run_mode == 'dry':
             pass
