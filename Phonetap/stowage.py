@@ -24,8 +24,8 @@ def stow(command: str,
     if filter:
         filter_re = re.compile(filter.replace('.', '\\.').replace('?', '.').replace('*', '.*'), re.IGNORECASE)
     re_timestamp = re.compile(
-        r'^(?P<head>.*?)(?P<yyyy>\d\d\d\d)[_\- ]?(?P<MM>\d\d)[_\- ]?(?P<dd>\d\d)'
-        r'([_\- ]?(?P<hh>\d\d)[_\- ]?(?P<mm>\d\d)([_\- ]?(?P<ss>\d\d))?)?'
+        r'^(?P<head>.*?)((?P<yyyy>\d\d\d\d)|(?P<yy>\d\d))[_\- ]?(?P<MM>\d\d)[_\- ]?(?P<dd>\d\d)'
+        r'([_\- ](?P<hh>\d\d)[_\- ]?(?P<mm>\d\d)([_\- ]?(?P<ss>\d\d))?)?'
         r'(?P<tail>.*?)\.(?P<ext>.*)$')
     min_date = datetime.fromisoformat(min_date)
     max_date = datetime.fromisoformat(max_date)
@@ -76,7 +76,9 @@ def stow(command: str,
                 ma_di = ma.groupdict()
                 try:
                     creation_time = datetime(
-                        int(ma_di['yyyy']), int(ma_di['MM']), int(ma_di['dd']),
+                        int(ma_di['yyyy']) if ma_di['yyyy'] else 2000 + int(ma_di['yy']),
+                        int(ma_di['MM']),
+                        int(ma_di['dd']),
                         int(ma_di['hh']) if ma_di['hh'] else 0,
                         int(ma_di['mm']) if ma_di['mm'] else 0,
                         int(ma_di['ss']) if ma_di['ss'] else 0)
