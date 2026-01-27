@@ -1,6 +1,5 @@
 import json
 import os
-from pathlib import Path
 
 profile_fields = (
     'username',
@@ -17,11 +16,15 @@ def _explode_profile(**kwargs):
     profile_file = kwargs['profile_file']
     profile_name = kwargs['profile']
 
-    with open(profile_file) as j:
-        profiles = json.loads(j.read())
+    if os.path.exists(profile_file):
+        with open(profile_file) as j:
+            profiles = json.loads(j.read())
+    else:
+        profiles = {}
 
-    saved_profile = profiles[profile_name]
-    profile = {fi: kwargs.get(fi) or saved_profile[fi] for fi in profile_fields}
+    saved_profile = profiles.get(profile_name, {})
+    profile = {fi: kwargs.get(fi) or saved_profile.get(fi) for fi in profile_fields}
+    # TODO: on creation, check that all the fields are present
     profile['profile'] = profile_name
     profile['profile_file'] = profile_file
     add_directories = kwargs['add_directories']
@@ -56,6 +59,7 @@ def edit(**kwargs):
     with open(profile_file, 'w') as j:
         dumps = json.dumps(profiles, indent=2)
         j.write(dumps)
+
 
 def list_profiles(profile_file):
     with open(profile_file, 'r') as j:
