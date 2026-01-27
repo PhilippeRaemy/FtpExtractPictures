@@ -38,18 +38,18 @@ def stow():
 
 def profile_option(f):
     options = [
-        click.option('--profile', required=True),
-        click.option('--username', required=False, default=None, type=str),
-        click.option('--password', required=False, default=None, type=str),
-        click.option('--host', required=False, default=None, type=str),
-        click.option('--port', required=False, default=None, type=int),
-        click.option('--local', required=False, default=None, type=str),
-        click.option('--directories', required=False, default=[], type=str),
-        click.option('--extensions', required=False, default=[], type=str),
-        click.option('--add-directories', required=False, default=[], type=str),
-        click.option('--remove-directories', required=False, default=[], type=str),
-        click.option('--add-extensions', required=False, default=None, type=str),
-        click.option('--remove-extensions', required=False, default=None, type=str)]
+        click.option('--profile', '-p', required=True),
+        click.option('--username', '-u', required=False, default=None, type=str),
+        click.option('--password', '-w', required=False, default=None, type=str),
+        click.option('--host', '-h', required=False, default=None, type=str),
+        click.option('--port', '-t', required=False, default=None, type=int),
+        click.option('--local', '-l', required=False, default=None, type=str),
+        click.option('--directories', '-d', required=False, multiple=True, type=str),
+        click.option('--extensions', '-x', required=False, multiple=True, type=str),
+        click.option('--add-directories', '-ad', required=False, multiple=True, type=str),
+        click.option('--remove-directories', '-xd', required=False, multiple=True, type=str),
+        click.option('--add-extensions', '-ax', required=False, default=None, type=str),
+        click.option('--remove-extensions', '-xx', required=False, default=None, type=str)]
 
     return reduce(lambda lf, opt: opt(lf), options, f)
 
@@ -147,7 +147,8 @@ def stow_options(f):
         click.option('--offset-hours', '-o', required=False, type=int, default=0, help='Set time offset in hours'),
         click.option('--suffix', '-x', required=False, type=str, default='', help='Set optional picture name suffix'),
         click.option('--filter', '-l', required=False, type=str, default='', help='Filter files with os-wildcards'),
-        click.option('--file-types', '-y', required=False, type=str, default='jpg,jpeg,mov,mp3,mp4,cr2,webp,avi,wav,m4a',
+        click.option('--file-types', '-y', required=False, type=str,
+                     default='jpg,jpeg,mov,mp3,mp4,cr2,webp,avi,wav,m4a',
                      help='\b\nFile extensions of interest, comma-delimited, no wildcards\n'),
         click.option('--min-date', '-max', required=False, type=str, default='1900-01-01', help='Minimum file date'),
         click.option('--max-date', '-min', required=False, type=str, default='2500-01-01', help='Maximum file date'),

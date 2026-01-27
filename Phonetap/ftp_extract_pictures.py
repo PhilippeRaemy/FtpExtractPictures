@@ -6,20 +6,14 @@ from os import listdir, path, remove
 from Phonetap.profiles import explode_profile
 
 
-def explore(profile: str, directory: str, username, password, host, port, local,
-            extensions,
-            add_extensions, remove_extensions):
-    username, password, _, remote_host, port, _, _ = explode_profile(profile, username, password, host, port, local,
-                                                                     [], extensions,
-                                                                     [], [],
-                                                                     add_extensions, remove_extensions)
-
+def explore(**kwargs):
+    username, password, _, remote_host, port, _, _ = explode_profile(**kwargs)
     with FTP() as ftp:
         print(f'Connecting to {remote_host}:{port}')
         ftp.connect(host=remote_host, port=port)
         ftp.login(user=username, passwd=password)
         print(ftp.getwelcome())
-        for name, attributes in ftp.mlsd(directory):
+        for name, attributes in ftp.mlsd(kwargs['directory']):
             print(name, attributes)
 
 
@@ -41,15 +35,9 @@ def remove_timestamp_file(local_directory):
     return date_threshold, (lambda _: remove(file_full_name)) if file_full_name else None
 
 
-def extract(profile, username, password, host, port, local,
-            directories, extensions,
-            add_directories, remove_directories,
-            add_extensions, remove_extensions):
+def extract(**kwargs):
     username, password, local_directory, remote_host, port, remote_directories, extensions \
-        = explode_profile(profile, username, password, host, port, local,
-                          directories, extensions,
-                          add_directories, remove_directories,
-                          add_extensions, remove_extensions)
+        = explode_profile(**kwargs)
 
     ext_re = re.compile('^.*\\' + ('$|^.*\\'.join(extensions)) + '$', re.IGNORECASE)
 

@@ -2,7 +2,7 @@
   "default": {
     "username": "philippe",
     "password": "philippe",
-    "local_directory": "b:/public/pictures/fromphones/philippe",
+    "local": "b:/public/pictures/fromphones/philippe",
     "port": 2121,
     "extensions": [
       ".jpg",
@@ -16,37 +16,37 @@
   "philippe": {
     "username": "philippe",
     "password": "philippe",
-    "local_directory": "b:/public/pictures/FromPhones/Philippe",
-    "remote_host": "192.168.0.219",
+    "local": "b:/public/pictures/FromPhones/Philippe",
+    "host": "192.168.0.219",
     "port": 2121,
-    "remote_directories": [
-      "/Pictures",
+    "directories": [
+      "/recordings",
       "/DCIM",
-      "/Telegram",
-      "/Threema",
       "/Movies/Threema",
+      "/Threema",
       "/Android/media/com.whatsapp",
-      "/recordings"
+      "/Pictures",
+      "/Telegram"
     ],
     "extensions": [
+      ".vid",
       ".jpg",
-      ".jpeg",
+      ".div",
+      ".wav",
+      ".mp3",
       ".mov",
       ".mp4",
-      ".vid",
-      ".div",
-      ".mp3",
-      ".wav"
+      ".jpeg"
     ],
-    "host": "192.168.0.126"
+    "profile": "philippe"
   },
   "severine": {
     "username": "severine",
     "password": "severine",
-    "local_directory": "b:/public/pictures/FromPhones/FairSev",
-    "remote_host": "192.168.0.12",
+    "local": "b:/public/pictures/FromPhones/FairSev",
+    "host": "192.168.0.12",
     "port": 2121,
-    "remote_directories": [
+    "directories": [
       "/Pictures",
       "/DCIM",
       "/Telegram",
@@ -66,10 +66,10 @@
   "severine-25": {
     "username": "severine",
     "password": "severine",
-    "local_directory": "b:/public/pictures/FromPhones/FairSev",
-    "remote_host": "192.168.0.25",
+    "local": "b:/public/pictures/FromPhones/FairSev",
+    "host": "192.168.0.25",
     "port": 2121,
-    "remote_directories": [
+    "directories": [
       "/Pictures",
       "/DCIM",
       "/Telegram",
@@ -89,10 +89,10 @@
   "severine-zenbook": {
     "username": "severine",
     "password": "severine",
-    "local_directory": "b:/public/pictures/FromPhones/FairSev",
-    "remote_host": "192.168.1.81",
+    "local": "b:/public/pictures/FromPhones/FairSev",
+    "host": "192.168.1.81",
     "port": 2121,
-    "remote_directories": [
+    "directories": [
       "/Pictures",
       "/DCIM",
       "/Telegram",
@@ -112,10 +112,10 @@
   "severine-15": {
     "username": "severine",
     "password": "severine",
-    "local_directory": "b:/public/pictures/fromphones/FairSev",
-    "remote_host": "192.168.0.15",
+    "local": "b:/public/pictures/fromphones/FairSev",
+    "host": "192.168.0.15",
     "port": 2121,
-    "remote_directories": [
+    "directories": [
       "/Pictures",
       "/DCIM",
       "/Telegram",
@@ -135,10 +135,10 @@
   "philippe_hotspot": {
     "username": "philippe",
     "password": "philippe",
-    "local_directory": "b:/public/pictures/FromPhones/Philippe",
-    "remote_host": "192.168.83.226",
+    "local": "b:/public/pictures/FromPhones/Philippe",
+    "host": "192.168.83.226",
     "port": 2121,
-    "remote_directories": [
+    "directories": [
       "/Pictures",
       "/DCIM",
       "/Telegram",
@@ -158,10 +158,10 @@
   "philippe_zenbook": {
     "username": "philippe",
     "password": "philippe",
-    "local_directory": "b:/public/pictures/FromPhones/Philippe",
-    "remote_host": "192.168.1.67",
+    "local": "b:/public/pictures/FromPhones/Philippe",
+    "host": "192.168.1.67",
     "port": 2121,
-    "remote_directories": [
+    "directories": [
       "/Pictures",
       "/DCIM",
       "/Telegram",

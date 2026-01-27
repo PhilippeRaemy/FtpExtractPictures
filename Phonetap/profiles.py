@@ -8,71 +8,48 @@ profiles_json = path.sep.join(path.realpath(__file__).split(path.sep)[:-1] + [PR
 with open(profiles_json) as j:
     profiles = json.loads(j.read())
 
+profile_fields = (
+    'username',
+    'password',
+    'local',
+    'host',
+    'port',
+    'directories',
+    'extensions')
 
 
-def explode_profile(profile_name, username, password, host, port, local, directories, extensions, add_directories,
-                    remove_directories, add_extensions, remove_extensions):
-    profile = profiles[profile_name]
+def _explode_profile(**kwargs):
     print('explode profile')
-    print(json.dumps({'profile_name'      : profile_name,
-                      'username'          : username,
-                      'password'          : password,
-                      'host'              : host,
-                      'port'              : port,
-                      'local'             : local,
-                      'directories'       : directories,
-                      'extensions'        : extensions,
-                      'add_directories'   : add_directories,
-                      'remove_directories': remove_directories,
-                      'add_extensions'    : add_extensions,
-                      'remove_extensions' : remove_extensions
-                      }, indent=4))
-    return username if username else profile['username'], \
-        password if password else profile['password'], \
-        local if local else profile['local_directory'], \
-        host if host else profile['remote_host'], \
-        port if port else profile['port'], \
-        directories if directories else \
-            set(profile['remote_directories']) \
-                .union(add_directories if add_directories else []) \
-                .difference(remove_directories if remove_directories else []), \
-        extensions if extensions else \
-            set(profile['extensions']) \
-                .union(add_extensions if add_extensions else add_extensions) \
-                .difference(remove_extensions if remove_extensions else remove_extensions)
+    profile_name = kwargs['profile']
+    saved_profile = profiles[profile_name]
+    profile = {fi: kwargs.get(fi) or saved_profile[fi] for fi in profile_fields}
+    profile['profile'] = profile_name
+    add_directories = kwargs['add_directories']
+    remove_directories = kwargs['remove_directories']
+    if not kwargs['directories']:
+        profile['directories'] = list(
+            set(profile['directories'])
+            .union(add_directories if add_directories else [])
+            .difference(remove_directories if remove_directories else []))
+    add_extensions = kwargs['add_extensions']
+    remove_extensions = kwargs['remove_extensions']
+    if not kwargs['extensions']:
+        profile['extensions'] = list(
+            set(profile['extensions'])
+            .union(add_extensions if add_extensions else [])
+            .difference(remove_extensions if remove_extensions else []))
+    print(json.dumps(profile, indent=4))
+    return profile
 
 
-def edit(profile, username, password, host, port, local,
-         directories, extensions,
-         add_directories, remove_directories,
-         add_extensions, remove_extensions, model):
-    dic = deepcopy(profiles.get(profile, profiles.get(model, {})))
-    if local:
-        dic['local_directory'] = local
-    if directories:
-        dic['directories'] = directories.split(';')
-    if extensions:
-        dic['extensions'] = extensions.split(';')
-    if add_directories:
-        dic['remote_directories'] = dic['remote_directories'] + add_directories.split(';')
-    if add_extensions:
-        dic['extensions'] = dic['extensions'] + add_extensions.split(';')
-    if remove_directories:
-        rm = remove_directories.split(';')
-        dic['directories'] = [d for d in dic['directories'] if d not in rm]
-    if remove_extensions:
-        rm = remove_extensions.split(';')
-        dic['extensions'] = [e for e in dic['extensions'] if e not in rm]
-    if username:
-        dic['username'] = username
-    if password:
-        dic['password'] = username
-    if host:
-        dic['remote_host'] = host
-    if port:
-        dic['port'] = port
-    profiles[profile] = dic
-    print(json.dumps(dic, indent=2))
+def explode_profile(**kwargs):
+    profile = _explode_profile(**kwargs)
+    return (profile[fi] for fi in profile_fields)
+
+
+def edit(**kwargs):
+    profile = _explode_profile(**kwargs)
+    profiles[profile['profile']] = profile
     with open(profiles_json, 'w') as j:
         dumps = json.dumps(profiles, indent=2)
         j.write(dumps)
