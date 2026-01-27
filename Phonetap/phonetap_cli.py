@@ -38,7 +38,8 @@ def stow():
 
 def profile_option(f):
     options = [
-        click.option('--profile', '-p', required=True),
+        click.option('--profile-file', '-f', required=False, help='The path fo the json file containing the profiles' ),
+        click.option('--profile', '-p', required=True, help='If omitted, the 1st available profile in the profile file is used'),
         click.option('--username', '-u', required=False, default=None, type=str),
         click.option('--password', '-w', required=False, default=None, type=str),
         click.option('--host', '-h', required=False, default=None, type=str),
@@ -74,13 +75,17 @@ def edit_profile(**kwargs):
 
 
 @profile.command('list')
-def list_profiles():
+@click.option('--profile-file', '-f', required=False, help='The path fo the json file containing the profiles')
+def list_profiles(profile_file):
     echo()
-    profiles.list_profiles()
+    profiles.list_profiles(profile_file)
 
 
 @profile.command('show')
+
+
 @click.argument('profile')
+@click.option('--profile-file', '-f', required=False, help='The path fo the json file containing the profiles')
 def show_profile(**kwargs):
     """
         Show the details of provided profile name

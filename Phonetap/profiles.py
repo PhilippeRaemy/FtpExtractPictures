@@ -1,13 +1,6 @@
 import json
 import os
-from os import path
 from pathlib import Path
-
-PROFILES_JSON = 'profiles.json'
-profiles_json = path.sep.join(path.realpath(__file__).split(path.sep)[:-1] + [PROFILES_JSON])
-
-with open(profiles_json) as j:
-    profiles = json.loads(j.read())
 
 profile_fields = (
     'username',
@@ -21,10 +14,16 @@ profile_fields = (
 
 def _explode_profile(**kwargs):
     print('explode profile')
+    profile_file = kwargs['profile_file']
     profile_name = kwargs['profile']
+
+    with open(profile_file) as j:
+        profiles = json.loads(j.read())
+
     saved_profile = profiles[profile_name]
     profile = {fi: kwargs.get(fi) or saved_profile[fi] for fi in profile_fields}
     profile['profile'] = profile_name
+    profile['profile_file'] = profile_file
     add_directories = kwargs['add_directories']
     remove_directories = kwargs['remove_directories']
     if not kwargs['directories']:
@@ -50,18 +49,23 @@ def explode_profile(**kwargs):
 
 def edit(**kwargs):
     profile = _explode_profile(**kwargs)
+    profile_file = profile['profile_file']
+    with open(profile_file, 'r') as j:
+        profiles = json.loads(j.read())
     profiles[profile['profile']] = profile
-    with open(profiles_json, 'w') as j:
+    with open(profile_file, 'w') as j:
         dumps = json.dumps(profiles, indent=2)
         j.write(dumps)
 
-
-def list_profiles():
+def list_profiles(profile_file):
+    with open(profile_file, 'r') as j:
+        profiles = json.loads(j.read())
     print(f'Available profiles are :{profiles.keys()}')
 
 
-def show(profile=None):
-    print(Path(os.curdir).resolve())
+def show(profile_file, profile=None):
+    with open(profile_file, 'r') as j:
+        profiles = json.loads(j.read())
     if profile:
         print(json.dumps(profiles[profile], indent=2))
     else:
