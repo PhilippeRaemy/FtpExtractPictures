@@ -1,7 +1,6 @@
+import inspect
 import json
 from functools import reduce
-from importlib.metadata import requires
-import inspect
 
 import click
 
@@ -38,8 +37,10 @@ def stow():
 
 def profile_option(f):
     options = [
-        click.option('--profile-file', '-f', required=False, help='The path fo the json file containing the profiles' ),
-        click.option('--profile', '-p', required=True, help='If omitted, the 1st available profile in the profile file is used'),
+        click.option('--profile-file', '-f', required=False, default='./profiles.json'
+                     , help='The path fo the json file containing the profiles'),
+        click.option('--profile', '-p', required=False,
+                     help='If omitted, the 1st available profile in the profile file is used'),
         click.option('--username', '-u', required=False, default=None, type=str),
         click.option('--password', '-w', required=False, default=None, type=str),
         click.option('--host', '-h', required=False, default=None, type=str),
@@ -82,8 +83,6 @@ def list_profiles(profile_file):
 
 
 @profile.command('show')
-
-
 @click.argument('profile')
 @click.option('--profile-file', '-f', required=False, help='The path fo the json file containing the profiles')
 def show_profile(**kwargs):
