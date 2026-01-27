@@ -20,11 +20,13 @@ def _explode_profile(**kwargs):
         with open(profile_file) as j:
             profiles = json.loads(j.read())
     else:
+        missing_fields = [fi for fi in profile_fields if not bool(kwargs[fi])]
+        if any(missing_fields):
+            print(f'On profile creation, all fields are required. {', '.join(missing_fields)} are missing.')
         profiles = {}
 
     saved_profile = profiles.get(profile_name, {})
     profile = {fi: kwargs.get(fi) or saved_profile.get(fi) for fi in profile_fields}
-    # TODO: on creation, check that all the fields are present
     profile['profile'] = profile_name
     profile['profile_file'] = profile_file
     add_directories = kwargs['add_directories']
