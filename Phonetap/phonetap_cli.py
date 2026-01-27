@@ -80,8 +80,11 @@ def list_profiles():
 
 
 @profile.command('show')
-@click.option('--profile', default='')
+@click.argument('profile')
 def show_profile(**kwargs):
+    """
+        Show the details of provided profile name
+    """
     echo(kwargs)
     profiles.show(**kwargs)
 

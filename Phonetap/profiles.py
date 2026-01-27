@@ -1,6 +1,7 @@
 import json
-from copy import deepcopy
+import os
 from os import path
+from pathlib import Path
 
 PROFILES_JSON = 'profiles.json'
 profiles_json = path.sep.join(path.realpath(__file__).split(path.sep)[:-1] + [PROFILES_JSON])
@@ -60,6 +61,7 @@ def list_profiles():
 
 
 def show(profile=None):
+    print(Path(os.curdir).resolve())
     if profile:
         print(json.dumps(profiles[profile], indent=2))
     else:
